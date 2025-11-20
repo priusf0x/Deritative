@@ -2,8 +2,7 @@
 #define TREE_H
 
 #include <stdio.h>
-
-#include "my_string.h"
+#include "ariphmetic_operations.h"
 
 enum edge_dir_e
 {
@@ -24,7 +23,7 @@ enum tree_return_e
     TREE_RETURN_EMPTY_TREE
 };
 
-typedef string_s node_data_t;
+typedef expression_s node_data_t;
 
 struct node_s
 {

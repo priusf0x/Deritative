@@ -5,7 +5,7 @@
 
 #include "Assert.h"
 #include "stack.h"
-#include "my_string.h"
+#include "ariphmetic_operations.h"
 
 static tree_return_e SetTreeSize(tree_t tree, size_t  new_size);
 static tree_return_e NumerizeElements(tree_t tree, size_t start_index);
@@ -34,8 +34,8 @@ TreeInit(tree_t* tree,
 
     //zero element creation;
     (*tree)->nodes_array[0] = {.parent_index = 1,        .parent_connection = EDGE_DIR_NO_DIRECTION,
-                            .right_index  = NO_LINK,  .left_index        = NO_LINK,
-                            .node_value   = 0};
+                               .right_index  = NO_LINK,  .left_index        = NO_LINK,
+                               .node_value   = {}};
     //end creating zero element;
     return TREE_RETURN_SUCCESS;
 }

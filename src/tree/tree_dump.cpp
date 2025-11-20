@@ -6,7 +6,7 @@
 #include "Assert.h"
 #include "tools.h"
 #include "stack.h"
-#include "my_string.h"
+#include "ariphmetic_operations.h"
 
 static tree_return_e TreeDot(const tree_t tree, const char* current_time);
 static void DrawNode(const node_s* node, FILE* dot_file);
@@ -20,103 +20,6 @@ GetLogFile()
 {
     static FILE* log_file = fopen(LOG_FILE_NAME, "w+");
     return log_file;
-}
-
-// ============================= BASE_DUMP_FUNCTION ===========================
-
-
-tree_return_e
-TreeBaseDump(const tree_t tree, 
-             FILE*        file_output)
-{
-    ASSERT(tree != NULL);
-    ASSERT(file_output != NULL);
-
-    swag_t bypass_stack = NULL;
-
-    const size_t stack_start_size = 10;
-
-    if (StackInit(&bypass_stack, stack_start_size, "InDepthBypass") != 0)
-    {
-        return TREE_RETURN_STACK_ERROR;
-    }
-
-    if (tree->nodes_count == 0)
-    {
-        StackDestroy(bypass_stack);
-        return TREE_RETURN_EMPTY_TREE;
-    }
-
-    ssize_t current_element = tree->nodes_array[0].left_index;
-    size_t last_direction = (size_t) EDGE_DIR_NO_DIRECTION;
-
-    fprintf(file_output, "( ");
-
-    do
-    {
-        PrintString(&(tree->nodes_array[current_element].node_value), file_output);
-
-        fprintf(file_output, "( ");
-
-        if (tree->nodes_array[current_element].left_index != NO_LINK)
-        {
-            if (StackPush(bypass_stack, (size_t) EDGE_DIR_LEFT) != 0)
-            {
-                return TREE_RETURN_STACK_ERROR;
-            }
-            
-            current_element = tree->nodes_array[current_element].left_index;
-        }
-        else if (tree->nodes_array[current_element].right_index != NO_LINK)
-        {
-            fprintf(file_output, "nil ");
-
-            if (StackPush(bypass_stack, (size_t) EDGE_DIR_RIGHT) != 0)
-            {
-                return TREE_RETURN_STACK_ERROR;
-            }
-        
-            current_element = tree->nodes_array[current_element].right_index;
-        }
-        else
-        {
-            fprintf(file_output, "nil nil " );
-
-            do
-            {
-                if (GetStackSize(bypass_stack) == 0)
-                {
-                    break; 
-                }
-
-                if (StackPop(bypass_stack, &last_direction) != 0)
-                {
-                    return TREE_RETURN_STACK_ERROR;
-                }
-                current_element = tree->nodes_array[current_element].parent_index;
-                
-                fprintf(file_output, ") ");
-
-            } while ((last_direction != EDGE_DIR_LEFT)
-                     || (tree->nodes_array[current_element].right_index == NO_LINK));
-
-            if (last_direction == EDGE_DIR_LEFT)
-            {
-                if (StackPush(bypass_stack, (size_t) EDGE_DIR_RIGHT) != 0)
-                {
-                    return TREE_RETURN_STACK_ERROR;
-                }
-
-                current_element = tree->nodes_array[current_element].right_index;
-            }
-        }
-    } while (GetStackSize(bypass_stack) != 0);
-
-    fprintf(file_output, ") nil )");
-
-    StackDestroy(bypass_stack);
-
-    return TREE_RETURN_SUCCESS;
 }
 
 // ============================== DUMP_FUNCTIONS ==============================
@@ -183,19 +86,55 @@ PrintTreeInfo(const tree_t tree,
 }
 
 static void
+PrintElementInString(const expression_s* expr,
+                     char*               address,
+                     size_t              string_length)
+{
+    ASSERT(expr != NULL);
+    ASSERT(address != NULL);
+
+    switch(expr->expression_type)
+    {
+        case EXPRESSION_TYPE_CONST:
+            snprintf(address, string_length, "constant %f", expr->expression.constant);
+            break;
+
+        case EXPRESSION_TYPE_OPERATOR:
+            snprintf(address, string_length, "operation %s", 
+                     OPERATION_STR_ARRAY[expr->expression.operation]); 
+            break;
+
+        case EXPRESSION_TYPE_VAR:
+            snprintf(address, string_length, "variable %c", expr->expression.variable);
+            break;
+
+        default: break;
+    }
+}
+
+static void
 PrintElementsInfo(const tree_t tree,
                   FILE*        file_output)
 {
-    for(size_t index = 0; index < tree->nodes_capacity; index++)
+    ASSERT(tree != NULL);
+    ASSERT(file_output != NULL);
+
+    for(size_t index = 0; index < tree->nodes_capacity; index++) 
     {
         fprintf(file_output, "<p> <h4> <li>index in table: %zu\n <br/>", tree->nodes_array[index].index_in_tree);
         fprintf(file_output, "left index: %ld \n <br/>", tree->nodes_array[index].left_index);
         fprintf(file_output, "right index: %ld\n <br/>", tree->nodes_array[index].right_index);
-        fprintf(file_output, "value:");
+
+        const size_t max_string_size = 30;
+        char element_string[max_string_size] = "sosal";
+
         if (tree->nodes_array[index].parent_connection != EDGE_DIR_NO_DIRECTION)
         {
-            PrintString(&(tree->nodes_array[index].node_value), file_output);
+            PrintElementInString(&tree->nodes_array[index].node_value,
+                                 element_string, max_string_size); 
         }
+
+        fprintf(file_output, "value: %s", element_string);
         fprintf(file_output, "<br/>");
         fprintf(file_output, "parent_index: %ld\n\n </li></p></h4>", tree->nodes_array[index].parent_index);
     }
@@ -263,25 +202,52 @@ DrawNode(const node_s* node,
     ASSERT(node != NULL);
     ASSERT(dot_file != NULL);
 
-    static const char* NODE_TEMPLATE = "%ld[label = \"{parent index = %ld| phys index = %ld"
-                                       "| value = %.*s|{left index = %ld | right index = %ld}}\"];\n";
+    const char* node_template  = "%ld[label = \"{parent index = %ld| phys index = %ld"
+                                 "| value = %s |{left index = %ld | right index = %ld}}\"];\n";
     const size_t string_size = 250;
     char graphviz_node[string_size] = {};
 
-    snprintf(graphviz_node, string_size, NODE_TEMPLATE, node->index_in_tree,
-             node->parent_index, node->index_in_tree, node->node_value.string_size,
-             node->node_value.string_source ,node->left_index, node->right_index);
+    const size_t max_string_size = 30;
+    char element_string[max_string_size] = "sosal";
+
+    PrintElementInString(&node->node_value, element_string, max_string_size); 
+
+    snprintf(graphviz_node, string_size, node_template, node->index_in_tree,
+             node->parent_index, node->index_in_tree, element_string ,
+             node->left_index, node->right_index);
 
     fprintf(dot_file, "%s\n", graphviz_node);
 
-    if (node->left_index != -1)
+    const char* operator_color = "#3bd02dff"; 
+    const char* var_color = "#3f31dbff";
+
+    switch(node->node_value.expression_type) // coloring node 
+    {
+        case EXPRESSION_TYPE_CONST:
+            break;
+
+        case EXPRESSION_TYPE_OPERATOR:        
+            fprintf(dot_file, "%zu[fillcolor = \"%s\"]", node->index_in_tree, 
+                    operator_color);
+            break;
+
+        case EXPRESSION_TYPE_VAR:
+            fprintf(dot_file, "%zu[fillcolor = \"%s\"]", node->index_in_tree, 
+                    var_color);
+            break;
+
+        default: break;
+    }
+
+    if (node->left_index != NO_LINK)
     {
         fprintf(dot_file, "%zu -- %ld;\n", node->index_in_tree, node->left_index);
     }
 
-    if (node->right_index != -1)
+    if (node->right_index != NO_LINK)
     {
         fprintf(dot_file, "%zu -- %ld;\n", node->index_in_tree, node->right_index);
     }
+
 }
 
