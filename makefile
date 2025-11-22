@@ -1,4 +1,13 @@
-SOURCES = common/simple_parser.cpp tree/tree.cpp stack/stack.cpp common/tools.cpp tree/tree_dump.cpp derivative_main.cpp mathematics/derivative.cpp common/my_string.cpp mathematics/latex_dump.cpp
+SOURCES = derivative_main.cpp \
+		  common/simple_parser.cpp \
+		  common/tools.cpp \
+		  common/my_string.cpp \
+		  stack/stack.cpp \
+		  tree/tree.cpp \
+		  tree/tree_dump.cpp \
+		  mathematics/derivative.cpp \
+		  mathematics/latex_dump.cpp \
+# 		  mathematics/take_derivative.cpp
 
 OBJ_DIR = obj
 SOURCE_DIR = src

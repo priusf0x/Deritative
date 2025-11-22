@@ -348,15 +348,17 @@ DeleteSubgraph(tree_t tree,
 }
 
 static tree_return_e
-CopyNode(tree_t  tree,
-         size_t  dst_parent_index,
-         size_t  src_index,
-         size_t* dst_index);
+CopyNode(tree_t     tree,
+         size_t     dst_parent_index,
+         size_t     src_index,
+         size_t*    dst_index,
+         edge_dir_e direction);
 
 tree_return_e 
-CopySubgraph(tree_t tree,
-             size_t parent_dest_index,
-             size_t src_index)
+CopySubgraph(tree_t     tree,
+             size_t     parent_dest_index,
+             size_t     src_index,
+             edge_dir_e direction)
 {
     ASSERT(tree != NULL);
 
@@ -371,17 +373,16 @@ CopySubgraph(tree_t tree,
     size_t dest_index = 0;
 
     if ((output = CopyNode(tree, parent_dest_index, 
-            src_index, &dest_index)) != TREE_RETURN_SUCCESS)
+            src_index, &dest_index, direction)) != TREE_RETURN_SUCCESS)
     {
+        MEOW;
         return output;
     }
-
-    TreeDump(tree);
 
     if (current_node.left_index != NO_LINK)
     {
         if ((output = CopySubgraph(tree, dest_index, 
-                            (size_t) current_node.left_index)) 
+                (size_t) current_node.left_index, EDGE_DIR_LEFT)) 
             != TREE_RETURN_SUCCESS)
         {
             return TREE_RETURN_SUCCESS;
@@ -391,7 +392,7 @@ CopySubgraph(tree_t tree,
     if (current_node.right_index != NO_LINK)
     {
         if ((output = CopySubgraph(tree, dest_index,
-                         (size_t) current_node.right_index)) 
+                (size_t) current_node.right_index, EDGE_DIR_RIGHT)) 
             != TREE_RETURN_SUCCESS)
         {
             return TREE_RETURN_SUCCESS;
@@ -402,10 +403,11 @@ CopySubgraph(tree_t tree,
 }
 
 static tree_return_e
-CopyNode(tree_t  tree,
-         size_t  dest_parent_index,
-         size_t  src_index,
-         size_t* dest_index)
+CopyNode(tree_t     tree,
+         size_t     dest_parent_index,
+         size_t     src_index,
+         size_t*    dest_index,
+         edge_dir_e direction)
 {
     ASSERT(tree != NULL);
 
@@ -413,6 +415,7 @@ CopyNode(tree_t  tree,
     cpy_node.left_index = NO_LINK;
     cpy_node.right_index = NO_LINK;
     cpy_node.parent_index = (ssize_t) dest_parent_index;
+    cpy_node.parent_connection = direction;
 
     tree_return_e output = TREE_RETURN_SUCCESS;
     

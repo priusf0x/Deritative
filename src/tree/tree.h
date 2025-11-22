@@ -54,7 +54,6 @@ tree_return_e TreeDestroy(tree_t tree);
 //============================= NODES_ACTIONS =================================
 
 tree_return_e TreeAddNode(tree_t tree, node_s* node);
-tree_return_e CopySubgraph(tree_t tree, size_t parent_dest_index, size_t src_index);
 
 // ============================== TREE_DUMP ===================================
 
@@ -65,5 +64,7 @@ tree_return_e TreeBaseDump(const tree_t tree, FILE* file_output);
 // ============================== BYPASS_FUNCTIONS ============================
 
 tree_return_e DeleteSubgraph(tree_t tree, size_t node_index);
+tree_return_e CopySubgraph(tree_t tree, size_t parent_dest_index, size_t src_index,
+                           edge_dir_e direction);
 
 #endif //TREE_H
