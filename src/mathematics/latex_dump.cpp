@@ -35,9 +35,9 @@ WriteExpression(deritative_t deritative,
                 FILE*        output_file);
 
 void
-WriteInLatex(deritative_t deritative,
-             size_t       current_node,
-             FILE*        output_file)
+LogDeritativeInLatex(deritative_t deritative,
+                     size_t       current_node,
+                     FILE*        output_file)
 {
     ASSERT(deritative != NULL);
     
@@ -58,8 +58,10 @@ WriteInLatex(deritative_t deritative,
         current_node = (size_t) node.left_index;
     }
 
-    WriteExpression(deritative, (ssize_t) current_node, output_file);
 
+    fprintf(output_file, "\\begin{equation}{\n ");
+    WriteExpression(deritative, (ssize_t) current_node, output_file);
+    fprintf(output_file, "\n} \\end{equation}\n");
 }
 
 // =========================== FILE_USAGE =====================================
@@ -99,15 +101,14 @@ StartLatexDocument(FILE* output_file)
         }
     }
 
-    const char* header_text = R"(
-    \documentclass[a4paper,10pt]{article}
-    \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
-    \usepackage[utf8]{inputenc}
-    \usepackage[T2A]{fontenc}
-    \usepackage[russian]{babel}
-    \usepackage{amsmath,amsfonts,amssymb}
-    \usepackage{float}
-    \begin{document})";
+    const char* header_text = 
+    "\\documentclass[a4paper,10pt]{article}\n"
+    "\\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}\n"
+    "\\usepackage[utf8]{inputenc}\n"
+    "\\usepackage{mathtools}\n"
+    "\\usepackage{amsmath,amsfonts,amssymb}\n"
+    "\\usepackage{float}\n"
+    "\\begin{document}{ \n \n";
     
     fprintf(output_file, "%s", header_text);
 }
@@ -124,11 +125,14 @@ EndLatexDocument(FILE* output_file)
         }
     }
 
-    const char* end_text = "\\end{document}\n";
+    const char* end_text = "}\\end{document}\n";
 
     fprintf(output_file, "%s", end_text);
 
-    SystemCall("latexmk %s -bibtex -f -c -pdf ", latex_log_file_name);
+    fclose(output_file);
+
+    SystemCall("pdflatex %s -f y 1>latex_output.log", latex_log_file_name);
+    SystemCall("rm *.aux *.log >latex_output.log");
 }
 
 void static 
@@ -285,7 +289,7 @@ WriteSubExpression(deritative_t deritative,
         fprintf(output_file, "{(");
     }
 
-    WriteInLatex(deritative, (size_t) current_node, output_file);
+    WriteExpression(deritative, current_node, output_file);
 
     if (!is_single)
     {

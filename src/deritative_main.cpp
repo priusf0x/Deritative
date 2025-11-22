@@ -26,11 +26,12 @@ main()
 
         return error_number;
     }
-
+    
     TreeDump(deritative->ariphmetic_tree);
     
-    WriteInLatex(deritative, 0, NULL);
+    LogDeritativeInLatex(deritative, 0, NULL);
 
+    LogDeritativeInLatex(deritative, 0, NULL);
     DeritativeDestroy(&deritative);
 
     EndLatexDocument(NULL);

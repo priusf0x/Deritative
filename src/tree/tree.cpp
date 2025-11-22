@@ -347,4 +347,81 @@ DeleteSubgraph(tree_t tree,
     return TREE_RETURN_SUCCESS;
 }
 
+static tree_return_e
+CopyNode(tree_t  tree,
+         size_t  dst_parent_index,
+         size_t  src_index,
+         size_t* dst_index);
 
+tree_return_e 
+CopySubgraph(tree_t tree,
+             size_t parent_dest_index,
+             size_t src_index)
+{
+    ASSERT(tree != NULL);
+
+    if (src_index > tree->nodes_capacity)
+    {
+        return TREE_RETURN_INCORRECT_VALUE;
+    }
+
+    node_s current_node = tree->nodes_array[src_index];
+
+    tree_return_e output = TREE_RETURN_SUCCESS;
+    size_t dest_index = 0;
+
+    if ((output = CopyNode(tree, parent_dest_index, 
+            src_index, &dest_index)) != TREE_RETURN_SUCCESS)
+    {
+        return output;
+    }
+
+    TreeDump(tree);
+
+    if (current_node.left_index != NO_LINK)
+    {
+        if ((output = CopySubgraph(tree, dest_index, 
+                            (size_t) current_node.left_index)) 
+            != TREE_RETURN_SUCCESS)
+        {
+            return TREE_RETURN_SUCCESS;
+        }
+    }
+
+    if (current_node.right_index != NO_LINK)
+    {
+        if ((output = CopySubgraph(tree, dest_index,
+                         (size_t) current_node.right_index)) 
+            != TREE_RETURN_SUCCESS)
+        {
+            return TREE_RETURN_SUCCESS;
+        }
+    }
+
+    return TREE_RETURN_SUCCESS;
+}
+
+static tree_return_e
+CopyNode(tree_t  tree,
+         size_t  dest_parent_index,
+         size_t  src_index,
+         size_t* dest_index)
+{
+    ASSERT(tree != NULL);
+
+    node_s cpy_node = tree->nodes_array[src_index];
+    cpy_node.left_index = NO_LINK;
+    cpy_node.right_index = NO_LINK;
+    cpy_node.parent_index = (ssize_t) dest_parent_index;
+
+    tree_return_e output = TREE_RETURN_SUCCESS;
+    
+    if ((output = TreeAddNode(tree, &cpy_node)) != TREE_RETURN_SUCCESS)
+    {
+        return output;
+    }
+
+    *dest_index = cpy_node.index_in_tree;
+
+    return TREE_RETURN_SUCCESS; 
+}
