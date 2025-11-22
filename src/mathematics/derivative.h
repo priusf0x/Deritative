@@ -9,7 +9,7 @@
 
 // ======================== ARIPHMETIC_FUNCTION_ENUM ==========================
 
-enum deritative_return_e 
+enum derivative_return_e 
 {
     DERITATIVE_RETURN_SUCCESS,
     DERITATIVE_RETURN_SYSTEM_CALL_ERROR,
@@ -24,18 +24,18 @@ enum deritative_return_e
 
 // ========================== STRUCTS_AND_UNIONS ==============================
 
-struct deritative_s
+struct derivative_s
 {
     tree_t ariphmetic_tree;
     char*  buffer;
 };
 
-typedef deritative_s* deritative_t;
+typedef derivative_s* derivative_t;
 
 // ========================== ARIPHMETIC_FUNCTIONS ============================
 
-deritative_return_e DeritativeInit(deritative_t* deritative, size_t start_tree_size, const char* file_name);
-deritative_return_e DeritativeDestroy(deritative_t* deritative);
+derivative_return_e DerivativeInit(derivative_t* deritative, size_t start_tree_size, const char* file_name);
+derivative_return_e DerivativeDestroy(derivative_t* deritative);
 
 // ============================================================================
 

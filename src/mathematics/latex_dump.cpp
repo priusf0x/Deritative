@@ -4,23 +4,23 @@
 #include <stdio.h>
 
 #include "Assert.h"
-#include "deritative.h"
+#include "derivative.h"
 #include "tools.h"
 
 static const char* latex_log_file_name = "logs/latex_dump.tex"; 
 
 void static 
-WriteConstInFile(deritative_t deritative,
+WriteConstInFile(derivative_t deritative,
                  size_t       current_node, 
                  FILE*        output_file);
 
 void static 
-WriteVarInFile(const deritative_t deritative,
+WriteVarInFile(const derivative_t deritative,
                size_t             current_node,
                FILE*              output_file);
 
 void static 
-WriteOperationInFile(deritative_t deritative,
+WriteOperationInFile(derivative_t deritative,
                      size_t       current_node,
                      FILE*        output_file);
 
@@ -30,12 +30,12 @@ GetLatexLogFile();
 // ============================= LOGGING_IN_FILE ==============================
 
 static void
-WriteExpression(deritative_t deritative,
+WriteExpression(derivative_t deritative,
                 ssize_t      current_node,
                 FILE*        output_file);
 
 void
-LogDeritativeInLatex(deritative_t deritative,
+LogDeritativeInLatex(derivative_t deritative,
                      size_t       current_node,
                      FILE*        output_file)
 {
@@ -85,7 +85,7 @@ SetLogFileName(const char* new_name)
 // ============================ DUMP_HELPERS ==================================
 
 void static  
-WriteSubExpression(deritative_t deritative,
+WriteSubExpression(derivative_t deritative,
                    ssize_t      current_node,
                    FILE*        output_file);
 
@@ -136,7 +136,7 @@ EndLatexDocument(FILE* output_file)
 }
 
 void static 
-WriteConstInFile(deritative_t deritative,
+WriteConstInFile(derivative_t deritative,
                  size_t       current_node, 
                  FILE*        output_file)
 {
@@ -149,7 +149,7 @@ WriteConstInFile(deritative_t deritative,
 }
 
 void static 
-WriteVarInFile(const deritative_t deritative,
+WriteVarInFile(const derivative_t deritative,
                size_t             current_node,
                FILE*              output_file)
 {
@@ -162,7 +162,7 @@ WriteVarInFile(const deritative_t deritative,
 }
 
 void static 
-WriteOperationInFile(deritative_t deritative,
+WriteOperationInFile(derivative_t deritative,
                      size_t       current_node,
                      FILE*        output_file)
 {
@@ -225,7 +225,7 @@ WriteOperationInFile(deritative_t deritative,
 // ============================ WRITE_FUNCTIONS ===============================
 
 static void
-WriteExpression(deritative_t deritative,
+WriteExpression(derivative_t deritative,
                 ssize_t      current_node,
                 FILE*        output_file) 
 {
@@ -262,7 +262,7 @@ WriteExpression(deritative_t deritative,
 }
 
 static void
-WriteSubExpression(deritative_t deritative,
+WriteSubExpression(derivative_t deritative,
                    ssize_t      current_node,
                    FILE*        output_file)
 {

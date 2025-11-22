@@ -1,4 +1,4 @@
-#include "deritative.h"
+#include "derivative.h"
 
 #include "tree.h"
 #include "simple_parser.h"
@@ -13,13 +13,13 @@ int
 main()
 {
     const size_t start_tree_size = 1; 
-    deritative_t deritative = NULL;
+    derivative_t deritative = NULL;
 
     int error_number = 0;
 
     StartLatexDocument(NULL);
 
-    if ((error_number = DeritativeInit(&deritative, start_tree_size, 
+    if ((error_number = DerivativeInit(&deritative, start_tree_size, 
                                         formula_file_name)) != 0)
     {   
         printf("huyna %d\n", error_number);
@@ -32,7 +32,7 @@ main()
     LogDeritativeInLatex(deritative, 0, NULL);
 
     LogDeritativeInLatex(deritative, 0, NULL);
-    DeritativeDestroy(&deritative);
+    DerivativeDestroy(&deritative);
 
     EndLatexDocument(NULL);
 

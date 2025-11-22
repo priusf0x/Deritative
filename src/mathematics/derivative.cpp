@@ -1,4 +1,4 @@
-#include "deritative.h"
+#include "derivative.h"
 
 #include <sys/stat.h>   
 #include <stdlib.h>
@@ -10,26 +10,26 @@
 #include "tree.h"
 #include "tools.h"
 
-static deritative_return_e 
-ReadFileData(deritative_t deritative,
+static derivative_return_e 
+ReadFileData(derivative_t deritative,
              const char*  file_name);
 
 static read_return_e
-RecursiveParser(deritative_t deritative,
+RecursiveParser(derivative_t deritative,
                 size_t*      current_position,
                 size_t       root_position);
 
 // ======================== MEMORY_CONTROLLING ================================
 
-deritative_return_e 
-DeritativeInit(deritative_t* deritative,
+derivative_return_e 
+DerivativeInit(derivative_t* deritative,
                size_t        start_tree_size,
                const char*   file_name)
 {
     ASSERT(deritative != NULL);
     ASSERT(file_name != NULL);
 
-    *deritative = (deritative_t) calloc(1, sizeof(deritative_s));
+    *deritative = (derivative_t) calloc(1, sizeof(derivative_s));
     
     if (*deritative == NULL)
     {
@@ -43,7 +43,7 @@ DeritativeInit(deritative_t* deritative,
         return DERITATIVE_RETURN_TREE_ERROR;
     }
 
-    deritative_return_e output = DERITATIVE_RETURN_SUCCESS;
+    derivative_return_e output = DERITATIVE_RETURN_SUCCESS;
 
     if ((output = ReadFileData(*deritative, file_name)) != 0)
     {
@@ -66,8 +66,8 @@ DeritativeInit(deritative_t* deritative,
     return DERITATIVE_RETURN_SUCCESS;
 }
 
-deritative_return_e
-DeritativeDestroy(deritative_t* deritative)
+derivative_return_e
+DerivativeDestroy(derivative_t* deritative)
 {
     if ((deritative != NULL) && (*deritative != NULL))
     {   
@@ -81,8 +81,8 @@ DeritativeDestroy(deritative_t* deritative)
 
 // ========================= INIT_HELP_FUNCTION ===============================
 
-static deritative_return_e 
-ReadFileData(deritative_t deritative,
+static derivative_return_e 
+ReadFileData(derivative_t deritative,
              const char*  file_name)
 {
     ASSERT(deritative != NULL);
@@ -168,13 +168,13 @@ ReadMnemonic(string_s* string,
 // =========================== RECURSION_ALGORITHM ============================
 
 static read_return_e 
-ReadNode(deritative_t deritative,
+ReadNode(derivative_t deritative,
          size_t*      current_position,
          size_t       root_position,
          edge_dir_e   node_position);
 
 static read_return_e
-RecursiveParser(deritative_t deritative,
+RecursiveParser(derivative_t deritative,
                 size_t*      current_position,
                 size_t       root_position)
 {
@@ -211,7 +211,7 @@ RecursiveParser(deritative_t deritative,
 }
 
 static read_return_e
-ReadNode(deritative_t  deritative,
+ReadNode(derivative_t  deritative,
          size_t*       current_position,
          size_t        root_position,
          edge_dir_e    node_position)

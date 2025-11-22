@@ -1,6 +1,0 @@
-#ifndef TAKE_DERITATIVE_H
-#define TAKE_DERITATIVE_H
-
-
-
-#endif //TAKE_DERITATIVE_H
