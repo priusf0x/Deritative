@@ -67,7 +67,7 @@ tree_return_e DeleteSubgraph(tree_t tree, size_t node_index);
 tree_return_e CopySubgraph(tree_t tree, size_t parent_dest_index, size_t src_index,
                            edge_dir_e direction);
 tree_return_e 
-ForceConnect(tree_t tree, size_t current_index, size_t new_parent, 
+ForceConnect(tree_t tree, ssize_t current_index, ssize_t new_parent, 
             edge_dir_e new_direction);
 
 #endif //TREE_H

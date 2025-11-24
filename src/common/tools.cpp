@@ -63,11 +63,24 @@ SystemCall(const char* command_tmp,
 }
 
 bool
-IsInteger(double number)
+CheckIfInteger(double number)
 {
     const double epsilon = 0.000001;
 
     if (fabs(round(number) - number) < epsilon)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool 
+CheckIfEqual(double number_1, double number_2)
+{   
+    const double epsilon = 0.000001;
+
+    if (fabs(number_1 - number_2) < epsilon)
     {
         return true;
     }

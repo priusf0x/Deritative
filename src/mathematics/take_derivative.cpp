@@ -6,8 +6,10 @@
 #include "tree.h"
 #include "tools.h"
 #include "latex_dump.h"
+#include "simplify.h"
 
-static void TakeVarDerivative(derivative_t derivative, ssize_t current_node);
+static take_derivative_return_e TakeVarDerivative(derivative_t derivative, 
+                                                  ssize_t current_node);
 
 // =============================== DEFINES ====================================
 
@@ -76,11 +78,13 @@ TakeDerivative(derivative_t derivative,
 
     CHECK_INDEX;
 
-    expression_s node_value = derivative->ariphmetic_tree->nodes_array[current_node].node_value;
+    expression_s node_value = derivative->ariphmetic_tree->
+                                nodes_array[current_node].node_value;
 
     if (node_value.expression_type == EXPRESSION_TYPE_CONST)
     {
-        DeleteSubgraph(derivative->ariphmetic_tree, (size_t) current_node);
+        derivative->ariphmetic_tree->
+            nodes_array[current_node].node_value.expression.constant = 0;
 
         return TAKE_DERIVATIVE_RETURN_SUCCESS;
     }
@@ -123,12 +127,14 @@ TakeDerivative(derivative_t derivative,
         }
     }
 
+    SimplifyNeutralMultipliers(deritative, 1);
+
     return TAKE_DERIVATIVE_RETURN_SUCCESS;
 }
 
 // ========================== TAKING_DERIVATIVES ==============================
 
-static void
+static take_derivative_return_e
 TakeVarDerivative(derivative_t derivative,
                   ssize_t       current_node)
 {
@@ -139,6 +145,8 @@ TakeVarDerivative(derivative_t derivative,
 
     derivative->ariphmetic_tree->
         nodes_array[current_node].node_value.expression.constant = 1;
+
+    return TAKE_DERIVATIVE_RETURN_SUCCESS;
 }
 
 // =========================== OPERATION_DERIVATION ===========================

@@ -275,14 +275,19 @@ ConnectNodes(tree_t  tree,
 
 tree_return_e 
 ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR AND NODE VALIDATOR
-             size_t     current_index,
-             size_t     new_parent,
+             ssize_t    current_index,
+             ssize_t    new_parent,
              edge_dir_e new_direction)
 {
     ASSERT(tree);
 
     node_s* current_node = &(tree->nodes_array[current_index]);
     node_s* node_array = tree->nodes_array;
+
+    if ((current_index == NO_LINK) || (new_parent == NO_LINK))
+    {
+        return TREE_RETURN_INCORRECT_VALUE;
+    }
 
     if (new_direction == EDGE_DIR_NO_DIRECTION)
     {

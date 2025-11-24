@@ -59,7 +59,6 @@ LogDeritativeInLatex(derivative_t deritative,
         current_node = (size_t) node.left_index;
     }
 
-
     fprintf(output_file, "\\begin{equation}{\n ");
     WriteExpression(deritative, (ssize_t) current_node, output_file);
     fprintf(output_file, "\n} \\end{equation}\n");
@@ -147,7 +146,7 @@ WriteConstInFile(derivative_t deritative,
     double number = deritative->ariphmetic_tree->
                 nodes_array[current_node].node_value.expression.constant;
 
-    if(IsInteger(number))
+    if(CheckIfInteger(number))
     {
         fprintf(output_file, "%ld", (long) number);
     }
@@ -212,14 +211,14 @@ WriteOperationInFile(derivative_t deritative,
             break;
 
         case OPERATOR_SIN:
-            WriteSubExpression(deritative, node.left_index, output_file);
             fprintf(output_file, " \\sin{ ");
+            WriteSubExpression(deritative, node.left_index, output_file);
             fprintf(output_file, "}");
             break;
 
         case OPERATOR_COS:
-            WriteSubExpression(deritative, node.left_index, output_file);
             fprintf(output_file, " \\cos{ ");
+            WriteSubExpression(deritative, node.left_index, output_file);
             fprintf(output_file, "}");
             break;
             
@@ -278,12 +277,12 @@ WriteSubExpression(derivative_t deritative,
     ASSERT(deritative != NULL);
     ASSERT(output_file != NULL);
 
-    node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
-    
-    if (node.parent_connection == EDGE_DIR_NO_DIRECTION)
+    if (current_node == NO_LINK)
     {
         return;
     }
+
+    node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
 
     bool is_single = false;
     

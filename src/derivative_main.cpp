@@ -6,6 +6,7 @@
 #include "tools.h"
 #include "latex_dump.h"
 #include "take_derivative.h"
+#include "simplify.h"
 
 static const char* formula_file_name = "pletnev.zov";
 
@@ -28,7 +29,6 @@ main()
     }
 
     LogDeritativeInLatex(deritative, 0, NULL);
-
     
     TakeDerivative(deritative, deritative->ariphmetic_tree->nodes_array[0].left_index);
 

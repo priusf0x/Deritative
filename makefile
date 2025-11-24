@@ -8,7 +8,7 @@ SOURCES = derivative_main.cpp \
 		  mathematics/derivative.cpp \
 		  mathematics/latex_dump.cpp \
 		  mathematics/take_derivative.cpp \
-# 		  mathematics/simplify\
+		  mathematics/simplify.cpp
 
 OBJ_DIR = obj
 SOURCE_DIR = src

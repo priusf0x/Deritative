@@ -33,17 +33,17 @@ DerivativeInit(derivative_t* deritative,
     
     if (*deritative == NULL)
     {
-        return DERITATIVE_RETURN_ALLOCATION_ERROR;
+        return DERIVATIVE_RETURN_ALLOCATION_ERROR;
     }
 
     if (TreeInit(&(*deritative)->ariphmetic_tree, start_tree_size) != 0)
     {
         free(*deritative);
 
-        return DERITATIVE_RETURN_TREE_ERROR;
+        return DERIVATIVE_RETURN_TREE_ERROR;
     }
 
-    derivative_return_e output = DERITATIVE_RETURN_SUCCESS;
+    derivative_return_e output = DERIVATIVE_RETURN_SUCCESS;
 
     if ((output = ReadFileData(*deritative, file_name)) != 0)
     {
@@ -60,10 +60,10 @@ DerivativeInit(derivative_t* deritative,
         free((*deritative)->buffer);
         free(*deritative);
 
-        return DERITATIVE_RETURN_READ_FILE_ERROR;
+        return DERIVATIVE_RETURN_READ_FILE_ERROR;
     }
 
-    return DERITATIVE_RETURN_SUCCESS;
+    return DERIVATIVE_RETURN_SUCCESS;
 }
 
 derivative_return_e
@@ -76,7 +76,7 @@ DerivativeDestroy(derivative_t* deritative)
         free(*deritative);
     }
 
-    return DERITATIVE_RETURN_SUCCESS;
+    return DERIVATIVE_RETURN_SUCCESS;
 }
 
 // ========================= INIT_HELP_FUNCTION ===============================
@@ -92,7 +92,7 @@ ReadFileData(derivative_t deritative,
 
     if (stat(file_name, &file_stat) != 0)
     {
-        return DERITATIVE_RETURN_SYSTEM_CALL_ERROR;
+        return DERIVATIVE_RETURN_SYSTEM_CALL_ERROR;
     }
 
     size_t char_number = (size_t) (file_stat.st_size);
@@ -100,14 +100,14 @@ ReadFileData(derivative_t deritative,
     FILE* file_input = fopen(file_name , "r");
     if (file_input == NULL)
     {
-        return DERITATIVE_RETURN_OPEN_FILE_ERROR;
+        return DERIVATIVE_RETURN_OPEN_FILE_ERROR;
     }
 
     deritative->buffer = (char*) calloc(char_number + 1, sizeof(char));
     if (deritative->buffer == NULL)
     {
         fclose(file_input);
-        return DERITATIVE_RETURN_ALLOCATION_ERROR;
+        return DERIVATIVE_RETURN_ALLOCATION_ERROR;
     }
     
     size_t read_count = fread(deritative->buffer , sizeof(char), char_number, file_input);
@@ -115,18 +115,18 @@ ReadFileData(derivative_t deritative,
     if (fclose(file_input) != 0)
     {
         free(deritative->buffer);
-        return DERITATIVE_RETURN_CLOSE_FILE_ERROR;
+        return DERIVATIVE_RETURN_CLOSE_FILE_ERROR;
     }
 
     if (read_count == 0)
     {
         free(deritative->buffer);
-        return DERITATIVE_RETURN_EMPTY_FILE;
+        return DERIVATIVE_RETURN_EMPTY_FILE;
     }
     
     deritative->buffer[read_count] = '\0';
 
-    return DERITATIVE_RETURN_SUCCESS;
+    return DERIVATIVE_RETURN_SUCCESS;
 }
 
 // ========================== READ_HELP_FUNCTIONS =============================
