@@ -30,9 +30,9 @@ size_t SkipNotSpaces(const char* string, size_t current_position);
 read_return_e ReadName(string_s* string_name, char* input_buffer, size_t* current_position);
 void PrintString(const string_s* string, FILE* file_output);
 bool CheckIfSymbol(char* string, size_t* current_position, char symbol);
-operations_e CheckIfOperator(string_s* string);
-char CheckIfVar(string_s* string);
-bool CheckIfDouble(string_s* string, double* number);
+operations_e CheckIfStrOperator(string_s* string);
+char CheckIfStrVar(string_s* string);
+bool CheckIfStrDouble(string_s* string, double* number);
 
 // ============================================================================
 

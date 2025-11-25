@@ -136,7 +136,7 @@ PrintString(const string_s* string,
 // ========================= CLASSIFICATION_OF_STRING =========================
 
 operations_e
-CheckIfOperator(string_s* string)
+CheckIfStrOperator(string_s* string)
 {
     ASSERT(string != NULL);
      
@@ -156,7 +156,7 @@ CheckIfOperator(string_s* string)
 }
 
 char
-CheckIfVar(string_s* string)
+CheckIfStrVar(string_s* string)
 {
     if ((string->string_size == 1) && (isalpha(*string->string_source)))
     {
@@ -167,7 +167,8 @@ CheckIfVar(string_s* string)
 }
 
 bool 
-CheckIfDouble(string_s* string, double* number)
+CheckIfStrDouble(string_s* string,  
+                 double* number)
 {
     ASSERT(string != NULL);
     ASSERT(number != NULL);

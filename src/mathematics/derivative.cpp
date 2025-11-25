@@ -140,21 +140,21 @@ ReadMnemonic(string_s* string,
 
     expression_u expr = {};
 
-    if ((expr.operation = CheckIfOperator(string)) != OPERATOR_UNDEFINED)
+    if ((expr.operation = CheckIfStrOperator(string)) != OPERATOR_UNDEFINED)
     {
         node->node_value = {.expression = expr, 
                             .expression_type = EXPRESSION_TYPE_OPERATOR};
 
         return EXPRESSION_TYPE_OPERATOR;
     }
-    else if ((expr.variable = CheckIfVar(string)) != OPERATOR_UNDEFINED)
+    else if ((expr.variable = CheckIfStrVar(string)) != OPERATOR_UNDEFINED)
     {
         node->node_value = {.expression = expr,
                             .expression_type = EXPRESSION_TYPE_VAR};
 
         return EXPRESSION_TYPE_VAR;
     }
-    else if (CheckIfDouble(string, &(expr.constant)))
+    else if (CheckIfStrDouble(string, &(expr.constant)))
     {
         node->node_value = {.expression = expr,
                             .expression_type = EXPRESSION_TYPE_CONST};
