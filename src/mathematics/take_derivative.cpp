@@ -18,78 +18,6 @@ static take_derivative_return_e TakeVarDerivative(derivative_t derivative,
 #define PARENT_INDEX(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_index
 #define PARENT_CONNECTION(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_connection
 
-#define TURN_ON_CAST _Pragma("GCC diagnostic warning \"-Wuseless-cast\"") \
-                     _Pragma("GCC diagnostic warning \"-Wconversion\"")\
-                     _Pragma("GCC diagnostic warning \"-Wimplicit-fallthrough\"")
-#define TURN_OFF_CAST _Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")\
-                      _Pragma("GCC diagnostic ignored \"-Wconversion\"")\
-                      _Pragma("GCC diagnostic ignored \"-Wimplicit-fallthrough\"")
-
-
-#define INIT_EXPR(__TYPE, __VALUE)\
-    do {switch(__TYPE)\
-    {\
-        TURN_OFF_CAST\
-        case EXPRESSION_TYPE_CONST:\
-            expr__.expression.constant = (double) __VALUE;\
-            break;\
-        case EXPRESSION_TYPE_OPERATOR:\
-            expr__.expression.operation = (operations_e) __VALUE;\
-            break;\
-        case EXPRESSION_TYPE_VAR:\
-            expr__.expression.variable = (char) __VALUE;\
-        case EXPRESSION_TYPE_UNDEFINED:\
-        default: return TAKE_DERIVATIVE_INCORRECT_EXPRESSION;\
-        TURN_ON_CAST\
-    }} while(0);
-
-#define CHECK_INDEX \
-    if (current_node == NO_LINK)\
-    {\
-        return TAKE_DERIVATIVE_UNDEFINED_FUNCTION;\
-    }
-
-#define INSERT_BEFORE(__CHILD, __TYPE, __VALUE, __HOW) \
-    do {take_derivative_return_e output = TAKE_DERIVATIVE_RETURN_SUCCESS;\
-        expression_s expr__ = {.expression_type = __TYPE};\
-        INIT_EXPR(__TYPE, __VALUE);\
-        if ((output = InsertNode(derivative, __CHILD, \
-        &expr__, __HOW)) != TAKE_DERIVATIVE_RETURN_SUCCESS)\
-        {\
-            return output;\
-        }\
-        } while (0)
-
-#define ADD_NODE(__PARENT, __TYPE, __VALUE, __HOW) \
-    do {take_derivative_return_e output = TAKE_DERIVATIVE_RETURN_SUCCESS;\
-        expression_s expr__ = {.expression_type = __TYPE};\
-        INIT_EXPR(__TYPE, __VALUE);\
-        if ((output = AddNode(derivative, __PARENT, \
-        &expr__, __HOW)) != TAKE_DERIVATIVE_RETURN_SUCCESS)\
-        {\
-            return output;\
-        }\
-        } while (0)
-
-#define COPY(__DST, __SRC, __HOW) \
-    do {if (CopySubgraph(derivative->ariphmetic_tree, (size_t) __DST, \
-        (size_t) __SRC, __HOW) != 0)\
-        {\
-            return TAKE_DERIVATIVE_TREE_ERROR;\
-        }\
-        } while (0)
-
-#define D(__X) \
-    do {take_derivative_return_e output = TAKE_DERIVATIVE_RETURN_SUCCESS; \
-        if ((output = TakeDerivative(derivative, ((ssize_t) __X))) != TAKE_DERIVATIVE_RETURN_SUCCESS)\
-        {\
-            return output;\
-        }\
-        } while (0)
-
-#define CHANGE_OPER(__OP)  derivative->ariphmetic_tree->\
-                            nodes_array[current_node].node_value.expression.operation = __OP
-
 static take_derivative_return_e
 TakePlusDerivative(derivative_t derivative,
                    ssize_t       current_node);
@@ -113,6 +41,18 @@ TakeSinDerivative(derivative_t derivative,
 static take_derivative_return_e
 TakeCosDerivative(derivative_t derivative,
                   ssize_t      current_node);
+                
+static take_derivative_return_e
+TakeLogDerivative(derivative_t derivative,
+                  ssize_t      current_node);
+
+static take_derivative_return_e
+TakeExpDerivative(derivative_t derivative,
+                  ssize_t      current_node);
+
+static take_derivative_return_e
+TakePowerDerivative(derivative_t derivative,
+                    ssize_t      current_node);
 
 // =========================== MAIN_DERIVATIVE ================================
 
@@ -122,7 +62,9 @@ TakeDerivative(derivative_t derivative,
 {
     ASSERT(derivative != NULL);
 
-    TreeDump(derivative->ariphmetic_tree);
+    #ifndef NDEBUG
+        TreeDump(derivative->ariphmetic_tree);
+    #endif
 
     CHECK_INDEX;
 
@@ -170,6 +112,18 @@ TakeDerivative(derivative_t derivative,
                 TakeCosDerivative(derivative, current_node);
                 break;
 
+            case OPERATOR_LN:
+                TakeLogDerivative(derivative, current_node);
+                break;
+
+            case OPERATOR_EXP:
+                TakeExpDerivative(derivative, current_node);
+                break;
+
+            case OPERATOR_POWER:
+                TakePowerDerivative(derivative, current_node);
+                break;
+
             case OPERATOR_UNDEFINED:
                 return TAKE_DERIVATIVE_UNDEFINED_FUNCTION;
 
@@ -199,208 +153,241 @@ TakeVarDerivative(derivative_t derivative,
 
 // =========================== OPERATION_DERIVATION ===========================
 
-// ============================== TREE_HELPERS ================================
-
-static take_derivative_return_e
-InsertNode(derivative_t      derivative,
-           ssize_t           current_node,
-           expression_s*     expr,
-           edge_dir_e        child_dir)
-{
-    ASSERT(derivative != NULL);
-    ASSERT(expr != NULL);
-
-    node_s node = derivative->ariphmetic_tree->
-                    nodes_array[current_node];
-
-    node_s new_node = {.parent_index      = node.parent_index,
-                       .parent_connection = node.parent_connection,
-                       .right_index       = NO_LINK,
-                       .left_index        = NO_LINK,
-                       .node_value        = *expr};
-
-    if (child_dir == EDGE_DIR_LEFT)
-    {
-        new_node.left_index = current_node;
-    }
-    else if (child_dir == EDGE_DIR_RIGHT)
-    {
-        new_node.right_index = current_node;
-    }
-    else 
-    {
-        return TAKE_DERIVATIVE_INVALID_VALUE;
-    }
-
-    if (TreeAddNode(derivative->ariphmetic_tree, &new_node) != 0)
-    {
-        return TAKE_DERIVATIVE_TREE_ERROR;
-    }
-    
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
-
-static take_derivative_return_e
-AddNode(derivative_t      derivative,
-        ssize_t           current_node,
-        expression_s*     expr,
-        edge_dir_e        dir)
-{
-    ASSERT(derivative != NULL);
-    ASSERT(expr != NULL);
-
-    node_s new_node = {.parent_index      = current_node,
-                       .parent_connection = dir,
-                       .right_index       = NO_LINK,
-                       .left_index        = NO_LINK,
-                       .node_value        = *expr};
-
-    if (TreeAddNode(derivative->ariphmetic_tree, &new_node) != 0)
-    {
-        return TAKE_DERIVATIVE_TREE_ERROR;
-    }
-
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
-
 // ============================= FUNCTION_DERIVATIVES =========================
 
-static take_derivative_return_e
-TakePlusDerivative(derivative_t derivative,
-                   ssize_t       current_node)
-{
-    ASSERT(derivative != NULL);
+// static take_derivative_return_e
+// TakePlusDerivative(derivative_t derivative,
+//                    ssize_t       current_node)
+// {
+//     ASSERT(derivative != NULL);
 
-    CHECK_INDEX;
+//     CHECK_INDEX;
 
-    D(RIGHT_INDEX(current_node));
-    D(LEFT_INDEX(current_node));
+//     D(RIGHT_INDEX(current_node));
+//     D(LEFT_INDEX(current_node));
 
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
-static take_derivative_return_e
-TakeMinusDerivative(derivative_t derivative,
-                    ssize_t       current_node)
-{
-    ASSERT(derivative != NULL);
+// static take_derivative_return_e
+// TakeMinusDerivative(derivative_t derivative,
+//                     ssize_t       current_node)
+// {
+//     ASSERT(derivative != NULL);
 
-    CHECK_INDEX;
+//     CHECK_INDEX;
 
-    D(RIGHT_INDEX(current_node));
-    D(LEFT_INDEX(current_node));
+//     D(RIGHT_INDEX(current_node));
+//     D(LEFT_INDEX(current_node));
 
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
-static take_derivative_return_e
-TakeMulDerivative(derivative_t derivative,
-                  ssize_t      current_node)
-{
-    ASSERT(derivative != NULL);
+// static take_derivative_return_e
+// TakeMulDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != NULL);
 
-    CHECK_INDEX;
+//     CHECK_INDEX;
 
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_PLUS, EDGE_DIR_LEFT);
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_PLUS, EDGE_DIR_LEFT);
 
-    current_node = PARENT_INDEX(current_node);
+//     current_node = PARENT_INDEX(current_node);
 
-    COPY(current_node, LEFT_INDEX(current_node), 
-         EDGE_DIR_RIGHT);
+//     COPY(current_node, LEFT_INDEX(current_node), 
+//          EDGE_DIR_RIGHT);
 
-    D(RIGHT_INDEX(RIGHT_INDEX(current_node)));
-    D(LEFT_INDEX(LEFT_INDEX(current_node)));
+//     D(RIGHT_INDEX(RIGHT_INDEX(current_node)));
+//     D(LEFT_INDEX(LEFT_INDEX(current_node)));
     
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
-static take_derivative_return_e
-TakeDivDerivative(derivative_t derivative,
-                  ssize_t      current_node)
-{
-    ASSERT(derivative != NULL);
+// static take_derivative_return_e
+// TakeDivDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != NULL);
 
-    CHANGE_OPER(OPERATOR_MUL);
+//     CHECK_INDEX;
 
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_MINUS, EDGE_DIR_LEFT);
+//     CHANGE_OPER(OPERATOR_MUL);
 
-    current_node = PARENT_INDEX(current_node);
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_MINUS, EDGE_DIR_LEFT);
 
-    COPY(current_node, LEFT_INDEX(current_node), EDGE_DIR_RIGHT);
+//     current_node = PARENT_INDEX(current_node);
 
-    D(LEFT_INDEX(LEFT_INDEX(current_node)));
-    D(RIGHT_INDEX(RIGHT_INDEX(current_node)));
+//     COPY(current_node, LEFT_INDEX(current_node), EDGE_DIR_RIGHT);
 
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_DIV, EDGE_DIR_LEFT);
+//     D(LEFT_INDEX(LEFT_INDEX(current_node)));
+//     D(RIGHT_INDEX(RIGHT_INDEX(current_node)));
+
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_DIV, EDGE_DIR_LEFT);
     
-    current_node = PARENT_INDEX(current_node);
+//     current_node = PARENT_INDEX(current_node);
 
-    ADD_NODE(current_node, EXPRESSION_TYPE_OPERATOR,
-             OPERATOR_POWER, EDGE_DIR_RIGHT);
+//     ADD_NODE(current_node, EXPRESSION_TYPE_OPERATOR,
+//              OPERATOR_POWER, EDGE_DIR_RIGHT);
 
-    COPY(RIGHT_INDEX(current_node), RIGHT_INDEX(LEFT_INDEX(LEFT_INDEX(current_node))), 
-         EDGE_DIR_LEFT);
+//     COPY(RIGHT_INDEX(current_node), RIGHT_INDEX(LEFT_INDEX(LEFT_INDEX(current_node))), 
+//          EDGE_DIR_LEFT);
 
-    ADD_NODE(RIGHT_INDEX(current_node), EXPRESSION_TYPE_CONST, 
-                                     2, EDGE_DIR_RIGHT);
+//     ADD_NODE(RIGHT_INDEX(current_node), EXPRESSION_TYPE_CONST, 
+//                                      2, EDGE_DIR_RIGHT);
 
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
-static take_derivative_return_e
-TakeSinDerivative(derivative_t derivative,
-                  ssize_t      current_node)
-{
-    ASSERT(derivative != 0);
+// static take_derivative_return_e
+// TakeSinDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != 0);
 
-    CHANGE_OPER(OPERATOR_COS);
+//     CHECK_INDEX;
 
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_MUL, EDGE_DIR_RIGHT);
+//     CHANGE_OPER(OPERATOR_COS);
 
-    current_node = PARENT_INDEX(current_node);
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_MUL, EDGE_DIR_RIGHT);
 
-    COPY(current_node, LEFT_INDEX(RIGHT_INDEX(current_node)),
-         EDGE_DIR_LEFT);
+//     current_node = PARENT_INDEX(current_node);
 
-    D(LEFT_INDEX(current_node));
+//     COPY(current_node, LEFT_INDEX(RIGHT_INDEX(current_node)),
+//          EDGE_DIR_LEFT);
 
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     D(LEFT_INDEX(current_node));
 
-static take_derivative_return_e
-TakeCosDerivative(derivative_t derivative,
-                  ssize_t      current_node)
-{
-    ASSERT(derivative != 0);
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
-    CHANGE_OPER(OPERATOR_SIN);
+// static take_derivative_return_e
+// TakeCosDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != 0);
 
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_MUL, EDGE_DIR_RIGHT);
+//     CHANGE_OPER(OPERATOR_SIN);
 
-    current_node = PARENT_INDEX(current_node);
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_MUL, EDGE_DIR_RIGHT);
 
-    COPY(current_node, LEFT_INDEX(RIGHT_INDEX(current_node)),
-         EDGE_DIR_LEFT);
+//     current_node = PARENT_INDEX(current_node);
 
-    D(LEFT_INDEX(current_node));
+//     COPY(current_node, LEFT_INDEX(RIGHT_INDEX(current_node)),
+//          EDGE_DIR_LEFT);
+
+//     D(LEFT_INDEX(current_node));
     
-    INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
-                  OPERATOR_MUL, EDGE_DIR_RIGHT);
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_MUL, EDGE_DIR_RIGHT);
 
-    current_node = PARENT_INDEX(current_node);
+//     current_node = PARENT_INDEX(current_node);
     
-    ADD_NODE(current_node, EXPRESSION_TYPE_CONST,
-             -1, EDGE_DIR_LEFT);
+//     ADD_NODE(current_node, EXPRESSION_TYPE_CONST,
+//              -1, EDGE_DIR_LEFT);
 
-    return TAKE_DERIVATIVE_RETURN_SUCCESS;
-}
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
+// static take_derivative_return_e
+// TakeLogDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != NULL);
 
+//     CHANGE_OPER(OPERATOR_DIV);
+
+//     COPY(current_node, LEFT_INDEX(current_node), EDGE_DIR_RIGHT);
+
+//     DELETE(LEFT_INDEX(current_node));
+
+//     ADD_NODE(current_node, EXPRESSION_TYPE_CONST, 
+//                         1, EDGE_DIR_LEFT);
+
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR, 
+//                   OPERATOR_MUL, EDGE_DIR_RIGHT);
+
+//     current_node = PARENT_INDEX(current_node);
+    
+//     COPY(current_node, RIGHT_INDEX(RIGHT_INDEX(current_node)), 
+//          EDGE_DIR_LEFT);
+
+//     D(LEFT_INDEX(current_node));
+
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
+
+// static take_derivative_return_e
+// TakeExpDerivative(derivative_t derivative,
+//                   ssize_t      current_node)
+// {
+//     ASSERT(derivative != NULL);
+
+//     CHECK_INDEX;
+
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                   OPERATOR_MUL, EDGE_DIR_RIGHT);
+
+//     current_node = PARENT_INDEX(current_node);
+
+//     COPY(current_node, LEFT_INDEX(RIGHT_INDEX(current_node)), 
+//          EDGE_DIR_LEFT);
+    
+//     D(LEFT_INDEX(current_node));
+
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
+
+// static take_derivative_return_e
+// TakePowerDerivative(derivative_t derivative,
+//                     ssize_t      current_node)
+// {
+//     ASSERT(derivative != NULL);
+
+//     CHECK_INDEX;
+
+//     INSERT_BEFORE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                     OPERATOR_MUL, EDGE_DIR_LEFT);
+
+//     current_node = PARENT_INDEX(current_node);
+
+//     ADD_NODE(current_node, EXPRESSION_TYPE_OPERATOR,
+//                 OPERATOR_PLUS, EDGE_DIR_RIGHT);
+
+//     ADD_NODE(RIGHT_INDEX(current_node), EXPRESSION_TYPE_OPERATOR,
+//                 OPERATOR_MUL, EDGE_DIR_LEFT);
+
+//     COPY(LEFT_INDEX(RIGHT_INDEX(current_node)), LEFT_INDEX(LEFT_INDEX(current_node)),
+//             EDGE_DIR_LEFT); 
+//     COPY(LEFT_INDEX(RIGHT_INDEX(current_node)), RIGHT_INDEX(LEFT_INDEX(current_node)),
+//             EDGE_DIR_RIGHT);
+
+//     current_node = RIGHT_INDEX(current_node);
+
+//     COPY(current_node, LEFT_INDEX(current_node), EDGE_DIR_RIGHT);
+
+//     current_node = LEFT_INDEX(current_node);
+
+//     INSERT_BEFORE(LEFT_INDEX(current_node), EXPRESSION_TYPE_OPERATOR,
+//                     OPERATOR_DIV, EDGE_DIR_LEFT);
+                    
+//     COPY(current_node, LEFT_INDEX(current_node), EDGE_DIR_RIGHT);
+//     D(LEFT_INDEX(current_node));
+
+//     current_node = RIGHT_INDEX(PARENT_INDEX(current_node));
+
+//     D(RIGHT_INDEX(current_node));
+    
+//     INSERT_BEFORE(LEFT_INDEX(current_node), EXPRESSION_TYPE_OPERATOR,
+//                     OPERATOR_LN, EDGE_DIR_LEFT);
+
+//     return TAKE_DERIVATIVE_RETURN_SUCCESS;
+// }
 
 // ============================== UNDEFINITION ================================
 
@@ -417,3 +404,4 @@ TakeCosDerivative(derivative_t derivative,
 #undef TURN_ON_CAST
 #undef TURN_OFF_CAST 
 #undef INIT_EXPR
+#undef DELETE

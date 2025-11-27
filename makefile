@@ -57,7 +57,7 @@ $(OBJ_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(HEADERS)
 	@mkdir -p $(dir $@)
 	@mkdir -p logs
 	@echo "Compiling" $<
-	@$(CC) $(CFLAGS) -c $< -o $@ 
+	@$(CC) $(CFLAGS) -c $< -o $@ 	
 	@echo "Compiled Successfully" $<
 
 $(TARGET): $(OBJECTS)
@@ -69,6 +69,10 @@ test:
 	@./list_sester.out
 
 build: TARGET
+
+logclean:
+	@rm -rf logs
+	@echo "Cleaned Logs Successfully"
 
 clean:
 	@rm -rf $(OBJ_DIR)

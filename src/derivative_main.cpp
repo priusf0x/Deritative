@@ -36,7 +36,7 @@ main()
 
     LogDeritativeInLatex(derivative, 0, NULL);
 
-    TreeDump(derivative->ariphmetic_tree);
+    // TreeDump(derivative->ariphmetic_tree);
 
     DerivativeDestroy(&derivative);
 

@@ -229,6 +229,18 @@ WriteOperationInFile(derivative_t deritative,
             fprintf(output_file, "}");
             break;
 
+        case OPERATOR_LN:
+            fprintf(output_file, "\\ln(");
+            WriteExpression(deritative, node.left_index, output_file);
+            fprintf(output_file, ")");
+            break;
+
+        case OPERATOR_EXP:
+            fprintf(output_file, "e^{ ");
+            WriteExpression(deritative, node.left_index, output_file);
+            fprintf(output_file, "}");
+            break;
+
         case OPERATOR_UNDEFINED:
             fprintf(output_file, "%s", undefined_message);
             break;

@@ -158,44 +158,15 @@ CheckTreeNode(tree_t  tree,
 
     uint8_t output = 0b0000'0000;
 
-    if ((parent >= (ssize_t) tree->nodes_capacity)     // check user's values
-        || (child_left >= (ssize_t) tree->nodes_capacity)
-        || (child_right > (ssize_t) tree->nodes_capacity))
-    {MEOW;
-        return INVALID_NODE;
-    }
-    else if (node->parent_connection == EDGE_DIR_NO_DIRECTION)
-    {
-        return INVALID_NODE;
-    }
-    else if (parent == NO_LINK)    // check parent if he is null
-    {
-        return INVALID_NODE;
-    }
-    else if ((child_left != NO_LINK) && (output |= CHILD_LEFT_USAGE)
-              && (tree->nodes_array[child_left].parent_connection == EDGE_DIR_NO_DIRECTION
-                  || child_left == 0))
+    if ((child_left != NO_LINK) && (output |= CHILD_LEFT_USAGE)
+              && (child_left == 0))
     {
         return INVALID_NODE;
     }
     else if ((child_right != NO_LINK) && (output |= CHILD_RIGHT_USAGE)
-              && (tree->nodes_array[child_right].parent_connection == EDGE_DIR_NO_DIRECTION
-                  || child_right == 0))
+              && (child_right == 0))
     {
         return INVALID_NODE;
-    }
-    else if (output == 0b0000'0000)
-    {
-        if ((node->parent_connection == EDGE_DIR_RIGHT) &&
-            (tree->nodes_array[parent].right_index != NO_LINK))
-        {
-            return INVALID_NODE;
-        }
-        else if ((node->parent_connection == EDGE_DIR_LEFT)
-                 && (tree->nodes_array[parent].left_index != NO_LINK))
-        {
-            return INVALID_NODE;
-        }
     }
 
     return output;
@@ -307,7 +278,7 @@ ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR AND NODE VALIDATOR
 
     if (new_direction == EDGE_DIR_LEFT)
     {
-        if ((output = DeleteSubgraph(tree, (size_t) node_array[new_parent].left_index)) 
+        if ((output = DeleteSubgraph(tree, node_array[new_parent].left_index)) 
             != TREE_RETURN_SUCCESS)
         {
             return output;
@@ -319,7 +290,7 @@ ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR AND NODE VALIDATOR
     }
     else if (new_direction == EDGE_DIR_RIGHT)
     {
-        if ((output = DeleteSubgraph(tree, (size_t) node_array[new_parent].right_index)) 
+        if ((output = DeleteSubgraph(tree, node_array[new_parent].right_index)) 
             != TREE_RETURN_SUCCESS)
         {
             return output;
@@ -336,9 +307,14 @@ ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR AND NODE VALIDATOR
 
 tree_return_e
 DeleteSubgraph(tree_t tree,
-               size_t node_index)
+               ssize_t node_index)
 {
     ASSERT(tree != NULL);
+
+    if (node_index == NO_LINK)
+    {
+        return TREE_RETURN_OPEN_FILE_ERROR;
+    }
 
     swag_t bypass_stack = NULL;
 
@@ -362,7 +338,7 @@ DeleteSubgraph(tree_t tree,
         tree->nodes_array[tree->nodes_array[node_index].parent_index].left_index = NO_LINK;
     }
 
-    if (StackPush(bypass_stack, node_index) != 0)
+    if (StackPush(bypass_stack, (size_t) node_index) != 0)
     {
         return TREE_RETURN_STACK_ERROR;
     }
@@ -410,30 +386,26 @@ DeleteSubgraph(tree_t tree,
 
 static tree_return_e
 CopyNode(tree_t     tree,
-         size_t     dst_parent_index,
-         size_t     src_index,
-         size_t*    dst_index,
+         ssize_t    dst_parent_index,
+         ssize_t    src_index,
+         ssize_t*   dst_index,
          edge_dir_e direction);
 
 tree_return_e 
 CopySubgraph(tree_t     tree,
-             size_t     parent_dest_index,
-             size_t     src_index,
+             ssize_t*   parent_dest_index,
+             ssize_t    src_index,
              edge_dir_e direction)
 {
     ASSERT(tree != NULL);
-
-    if (src_index > tree->nodes_capacity)
-    {
-        return TREE_RETURN_INCORRECT_VALUE;
-    }
+    ASSERT(parent_dest_index != NULL);
 
     node_s current_node = tree->nodes_array[src_index];
 
     tree_return_e output = TREE_RETURN_SUCCESS;
-    size_t dest_index = 0;
+    ssize_t dest_index = 0;
 
-    if ((output = CopyNode(tree, parent_dest_index, 
+    if ((output = CopyNode(tree, *parent_dest_index, 
             src_index, &dest_index, direction)) != TREE_RETURN_SUCCESS)
     {
         return output;
@@ -441,8 +413,8 @@ CopySubgraph(tree_t     tree,
 
     if (current_node.left_index != NO_LINK)
     {
-        if ((output = CopySubgraph(tree, dest_index, 
-                (size_t) current_node.left_index, EDGE_DIR_LEFT)) 
+        if ((output = CopySubgraph(tree, &dest_index, 
+                                    current_node.left_index, EDGE_DIR_LEFT)) 
             != TREE_RETURN_SUCCESS)
         {
             return TREE_RETURN_SUCCESS;
@@ -451,26 +423,33 @@ CopySubgraph(tree_t     tree,
 
     if (current_node.right_index != NO_LINK)
     {
-        if ((output = CopySubgraph(tree, dest_index,
-                (size_t) current_node.right_index, EDGE_DIR_RIGHT)) 
+        if ((output = CopySubgraph(tree, &dest_index,
+                                    current_node.right_index, EDGE_DIR_RIGHT)) 
             != TREE_RETURN_SUCCESS)
         {
             return TREE_RETURN_SUCCESS;
         }
     }
 
+    *parent_dest_index = dest_index;
+
     return TREE_RETURN_SUCCESS;
 }
 
 static tree_return_e
 CopyNode(tree_t     tree,
-         size_t     dest_parent_index,
-         size_t     src_index,
-         size_t*    dest_index,
+         ssize_t    dest_parent_index,
+         ssize_t    src_index,
+         ssize_t*   dest_index,
          edge_dir_e direction)
 {
     ASSERT(tree != NULL);
 
+    if ((src_index == NO_LINK) || (dest_parent_index == NO_LINK))
+    {
+        return TREE_RETURN_INCORRECT_VALUE;
+    }
+    
     node_s cpy_node = tree->nodes_array[src_index];
     cpy_node.left_index = NO_LINK;
     cpy_node.right_index = NO_LINK;
@@ -484,7 +463,7 @@ CopyNode(tree_t     tree,
         return output;
     }
 
-    *dest_index = cpy_node.index_in_tree;
+    *dest_index = (ssize_t) cpy_node.index_in_tree;
 
     return TREE_RETURN_SUCCESS; 
 }

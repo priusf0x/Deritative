@@ -41,7 +41,9 @@ SimplifyNeutralMultipliers(derivative_t derivative,
         return SIMPLIFY_RETURN_INCORRECT_VALUE;
     }
 
-    TreeDump(derivative->ariphmetic_tree);
+    #ifndef NDEBUG
+        TreeDump(derivative->ariphmetic_tree);
+    #endif
 
     node_s node = derivative->ariphmetic_tree->nodes_array[current_node];
 
@@ -292,8 +294,6 @@ CheckIfOperator(const derivative_t derivative,
                 ssize_t            current_node)
 {
     ASSERT(derivative != NULL);
-
-    node_s* node_array = derivative->ariphmetic_tree->nodes_array;
 
     return derivative->ariphmetic_tree->nodes_array[current_node].
             node_value.expression_type == EXPRESSION_TYPE_OPERATOR;

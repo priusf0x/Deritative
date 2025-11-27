@@ -1,3 +1,5 @@
+#ifndef NDEBUG
+
 #include "tree.h"
 
 #include <cstddef>
@@ -251,3 +253,4 @@ DrawNode(const node_s* node,
 
 }
 
+#endif 

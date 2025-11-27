@@ -11,14 +11,16 @@ enum expression_type_e
 
 enum operations_e 
 {
-    OPERATOR_UNDEFINED  = 0,
-    OPERATOR_PLUS       = 1,
-    OPERATOR_MINUS      = 2,
-    OPERATOR_MUL        = 3,
-    OPERATOR_DIV        = 4,
-    OPERATOR_SIN        = 5,
-    OPERATOR_COS        = 6,
-    OPERATOR_POWER      = 7
+    OPERATOR_UNDEFINED = 0,
+    OPERATOR_PLUS      = 1,
+    OPERATOR_MINUS     = 2,
+    OPERATOR_MUL       = 3,
+    OPERATOR_DIV       = 4,
+    OPERATOR_SIN       = 5,
+    OPERATOR_COS       = 6,
+    OPERATOR_POWER     = 7,
+    OPERATOR_LN        = 8,
+    OPERATOR_EXP       = 9
 };
 
 const char* const  OPERATION_STR_ARRAY[] = 
@@ -29,7 +31,9 @@ const char* const  OPERATION_STR_ARRAY[] =
      "/",
      "sin",
      "cos",
-     "^"};
+     "^",
+     "ln",
+     "exp"};
 const size_t OPERATION_COUNT = sizeof(OPERATION_STR_ARRAY) / sizeof(OPERATION_STR_ARRAY[0]);
 
 // struct variable_e

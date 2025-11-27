@@ -57,14 +57,16 @@ tree_return_e TreeAddNode(tree_t tree, node_s* node);
 
 // ============================== TREE_DUMP ===================================
 
+#ifndef NDEBUG
 FILE* GetLogFile();
 void TreeDump(const tree_t tree);
 tree_return_e TreeBaseDump(const tree_t tree, FILE* file_output);
+#endif 
 
 // ============================== BYPASS_FUNCTIONS ============================
 
-tree_return_e DeleteSubgraph(tree_t tree, size_t node_index);
-tree_return_e CopySubgraph(tree_t tree, size_t parent_dest_index, size_t src_index,
+tree_return_e DeleteSubgraph(tree_t tree, ssize_t node_index);
+tree_return_e CopySubgraph(tree_t tree, ssize_t* parent_dest_index, ssize_t src_index,
                            edge_dir_e direction);
 tree_return_e 
 ForceConnect(tree_t tree, ssize_t current_index, ssize_t new_parent, 
