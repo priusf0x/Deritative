@@ -88,6 +88,8 @@ CheckIfFunction(derivative_t derivative)
 static ssize_t 
 GetN(derivative_t derivative)
 {
+    RETURN_NO_LINK_IF_ERROR;
+
     #ifndef NDEBUG
         BufferDump(derivative->buffer);
     #endif
@@ -97,8 +99,16 @@ GetN(derivative_t derivative)
 
     double value = strtod(current_string, &endptr);
 
-    derivative->buffer->current_position = (size_t) (endptr - 
-                                                        derivative->buffer->buffer);
+    size_t new_position = (size_t) (endptr - derivative->buffer->buffer);
+    if (new_position == derivative->buffer->current_position)
+    {
+        derivative->error = DERIVATIVE_RETURN_READ_ERROR;
+        
+        return NO_LINK;
+    }
+
+    derivative->buffer->current_position = new_position;
+    
     SkipSpacesInBuffer(derivative->buffer);
 
     return CONST(value);
@@ -107,9 +117,13 @@ GetN(derivative_t derivative)
 static ssize_t
 GetP(derivative_t derivative)
 {
+    RETURN_NO_LINK_IF_ERROR;
+
     char current_symbol = *CURRENT_STRING;
     ssize_t return_value = NO_LINK;
     operations_e possible_op = OPERATOR_UNDEFINED;
+
+    RETURN_NO_LINK_IF_ERROR;
 
     #ifndef NDEBUG
         BufferDump(derivative->buffer);
@@ -117,7 +131,6 @@ GetP(derivative_t derivative)
 
     if (current_symbol == '(')
     {
-        //TODO -  придумать обработку какую нибудь хз
         SkipNSymbols(derivative->buffer, 1);
         SkipSpacesInBuffer(derivative->buffer);
 
@@ -173,6 +186,8 @@ GetP(derivative_t derivative)
 static ssize_t
 GetT(derivative_t derivative)
 {
+    RETURN_NO_LINK_IF_ERROR;
+
     ssize_t last_add = GetP(derivative);
 
     char last_symbol = *CURRENT_STRING;
@@ -181,6 +196,8 @@ GetT(derivative_t derivative)
     while((last_symbol == '*') || (last_symbol == '/')
           || (last_symbol == '^'))
     {
+        RETURN_NO_LINK_IF_ERROR;
+
         #ifndef NDEBUG
             BufferDump(derivative->buffer);
         #endif
@@ -204,7 +221,8 @@ GetT(derivative_t derivative)
                 last_add = POW(last_add, GetP(derivative));
                 break;
 
-            default: return NO_LINK;
+            default: derivative->error = DERIVATIVE_RETURN_READ_ERROR;  
+                     return NO_LINK;
         }
 
         last_symbol = *CURRENT_STRING;
@@ -216,6 +234,8 @@ GetT(derivative_t derivative)
 static ssize_t
 GetE(derivative_t derivative)
 {
+    RETURN_NO_LINK_IF_ERROR;    
+
     ssize_t last_add = GetT(derivative);
 
     char last_symbol = *CURRENT_STRING;
@@ -223,6 +243,8 @@ GetE(derivative_t derivative)
 
     while((last_symbol == '+') || (last_symbol == '-'))
     {
+        RETURN_NO_LINK_IF_ERROR;
+
         #ifndef NDEBUG
             BufferDump(derivative->buffer);
         #endif
@@ -242,7 +264,8 @@ GetE(derivative_t derivative)
                 last_add = SUB(last_add, GetT(derivative));
                 break;
 
-            default: return NO_LINK;
+            default: derivative->error = DERIVATIVE_RETURN_READ_ERROR;  
+                     return NO_LINK;
         }
 
         last_symbol = *CURRENT_STRING;
@@ -258,8 +281,8 @@ ConvertToGraph(derivative_t derivative)
 
     if ((readen_node == NO_LINK) || IF_DERIVATIVE_FAILED)
     {
-        const char* error_read_message = RED "Error was occupied in reading." 
-                                             "Buffer dump:\n";
+        const char* error_read_message = RED      "Error was occupied in reading." 
+                                         STANDARD "Buffer dump:\n" ;
 
         fprintf(stderr, "%s", error_read_message);
         BufferDump(derivative->buffer);

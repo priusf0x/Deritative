@@ -1,4 +1,4 @@
-#ifndef NDEBUG
+#ifndef NDEBUvG
 
 #include "tree.h"
 
@@ -135,7 +135,8 @@ PrintElementsInfo(const tree_t tree,
 
         fprintf(file_output, "value: %s", element_string);
         fprintf(file_output, "<br/>");
-        fprintf(file_output, "parent_index: %ld\n\n </li></p></h4>", tree->nodes_array[index].parent_index);
+        fprintf(file_output, "parent_index: %ld\n\n <br/>", tree->nodes_array[index].parent_index);
+        fprintf(file_output, "parent_index: %d\n\n </li></p></h4>", tree->nodes_array[index].parent_connection);
     }
 }
 

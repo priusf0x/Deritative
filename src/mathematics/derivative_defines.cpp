@@ -5,9 +5,6 @@
 #include "expression.h"
 #include "tools.h"
 
-#define PARENT_INDEX(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_index
-#define PARENT_CONNECTION(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_connection
-
 ssize_t
 DerivativeCopy(derivative_t derivative,
                ssize_t      src)
@@ -33,19 +30,19 @@ DerivativeAddConst(derivative_t derivative,
     ASSERT(derivative != NULL);
     RETURN_NO_LINK_IF_ERROR;
 
-    node_s op_node = {.parent_index  = NO_LINK,
+    node_s const_node = {.parent_index  = NO_LINK,
                       .right_index   = NO_LINK,
                       .left_index    = NO_LINK,
                       .node_value    = {.expression = {.constant = value},
                                         .expression_type = EXPRESSION_TYPE_CONST},
                       .index_in_tree = NO_LINK};    
 
-    if (TreeAddNode(derivative->ariphmetic_tree, &op_node) != 0)
+    if (TreeAddNode(derivative->ariphmetic_tree, &const_node) != 0)
     {
         derivative->error = DERIVATIVE_RETURN_TREE_ERROR;
     }
 
-    return op_node.index_in_tree;
+    return const_node.index_in_tree;
 }
 
 ssize_t 
@@ -55,20 +52,19 @@ DerivativeAddVar(derivative_t derivative,
     ASSERT(derivative != NULL);
     RETURN_NO_LINK_IF_ERROR;
 
-    node_s op_node = {.parent_index  = NO_LINK,
+    node_s var_node = {.parent_index  = NO_LINK,
                       .right_index   = NO_LINK,
                       .left_index    = NO_LINK,
                       .node_value    = {.expression = {.variable = value},
                                         .expression_type = EXPRESSION_TYPE_VAR},
                       .index_in_tree = NO_LINK};    
 
-    if (TreeAddNode(derivative->ariphmetic_tree, &op_node) != 0)
+    if (TreeAddNode(derivative->ariphmetic_tree, &var_node) != 0)
     {
         derivative->error = DERIVATIVE_RETURN_TREE_ERROR;
     }
 
-
-    return op_node.index_in_tree;
+    return var_node.index_in_tree;
 }
 
 ssize_t 

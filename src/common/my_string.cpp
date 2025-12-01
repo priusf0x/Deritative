@@ -56,7 +56,7 @@ PrintString(const string_s* string,
     fprintf(file_output, "\" ");
 }
 
-bool 
+bool // strncmp but after string must be only allowed symbols  
 ExStrCmp(const char* string, 
          const char* example, 
          size_t      lenght, 

@@ -11,9 +11,6 @@
 
 // ================================= RULES ====================================
 
-#define PARENT_INDEX(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_index
-#define PARENT_CONNECTION(__X)  derivative->ariphmetic_tree->nodes_array[__X].parent_connection
-
 static ssize_t 
 TakeConstDerivative(derivative_t derivative,
                     ssize_t      current_node)
@@ -42,27 +39,27 @@ TakeMulDerivative(derivative_t derivative,
 static ssize_t 
 TakeDivDerivative(derivative_t derivative,
                   ssize_t      current_node)
-{ REPLACE(DIV(SUB( MUL(cL, D(cR)), MUL(D(cL), cR)), POW(cR, CONST(2)))) }
+{ REPLACE(DIV(SUB( MUL(cL, D(cR)), MUL(D(cL), cR)), POW(cR, CONST(2)))); }
 
 static ssize_t 
 TakeSinDerivative(derivative_t derivative,
                   ssize_t      current_node)
-{ REPLACE(MUL(D(cL), COS(cL))) }
+{ REPLACE(MUL(D(cL), COS(cL)));}
 
 static ssize_t 
 TakeCosDerivative(derivative_t derivative,
                   ssize_t      current_node)
-{ REPLACE(MUL(D(cL), MUL(CONST(-1), SIN(cL)))) }
+{ REPLACE(MUL(D(cL), MUL(CONST(-1), SIN(cL)))); }
 
 static ssize_t 
 TakeLnDerivative(derivative_t derivative,
                  ssize_t      current_node)
-{ REPLACE(MUL(D(cL), DIV(CONST(1), cL))) }
+{ REPLACE(MUL(D(cL), DIV(CONST(1), cL))); }
 
 static ssize_t 
 TakeExpDerivative(derivative_t derivative,
                   ssize_t      current_node)
-{ REPLACE(MUL(D(cL), EXP(cL))) }
+{ REPLACE(MUL(D(cL), EXP(cL))); }
 
 struct function_derivative_s
 {

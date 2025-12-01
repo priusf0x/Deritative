@@ -295,7 +295,7 @@ ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR
 
     node_s* current_node = &(tree->nodes_array[current_index]);
     node_s* node_array = tree->nodes_array;
-
+    
     RETURN_IF_NODE_BAD(current_index);
     RETURN_IF_NODE_BAD(new_parent);
 
