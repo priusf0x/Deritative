@@ -50,6 +50,19 @@ TakeDivDerivative(derivative_t derivative,
 { REPLACE(DIV__(SUB__( MUL__(c_L, D__(c_R)), MUL__(D__(c_L), c_R)), POW__(c_R, CONST__(2)))); }
 
 static ssize_t 
+TakePowDerivative(derivative_t derivative,
+                  ssize_t      current_node)
+{ if (NODE(L_O)->node_value.expression_type == EXPRESSION_TYPE_CONST
+      && NODE(R_O)->node_value.expression_type == EXPRESSION_TYPE_CONST)
+    {REPLACE(CONST__(0));}
+  else if (NODE(R_O)->node_value.expression_type == EXPRESSION_TYPE_CONST)
+    {REPLACE(MUL__(SUB__(c_R, 1), D__(c_L)));}
+  else 
+    {REPLACE(D__(EXP__(MUL__(LN__(c_L), c_R)))); }
+}
+
+
+static ssize_t 
 TakeSinDerivative(derivative_t derivative,
                   ssize_t      current_node)
 { REPLACE(MUL__(D__(c_L), COS__(c_L)));}

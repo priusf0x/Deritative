@@ -88,10 +88,10 @@ ReadVarString(char*       src,
 
     while (CheckIfSymbVar(current_symbol))
     {
-        current_symbol = src[lenght]; 
         lenght++;
+        current_symbol = src[lenght]; 
     }
 
     *string_dst = {.string_source = src,
-                   .string_size   = lenght -1};
+                   .string_size   = lenght};
 }

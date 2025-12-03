@@ -279,19 +279,19 @@ CheckNode(tree_t  tree,
           ssize_t current_index)
 {
     node_s current_node = tree->nodes_array[current_index];
-
+    
     if (current_index == NO_LINK)
     {
         return TREE_RETURN_INCORRECT_VALUE;
     }
-    else if (current_index > (ssize_t) tree->nodes_capacity)
+    else if (current_index > tree->nodes_capacity)
     {
         return TREE_RETURN_INCORRECT_VALUE;
     }
     else if ((current_index != 0) 
             && ((current_node.parent_connection == EDGE_DIR_NO_DIRECTION)
                 && (current_node.right_index == NO_LINK) 
-                && (current_node.right_index == NO_LINK)))
+                && (current_node.left_index == NO_LINK)))
     {
         return TREE_RETURN_INVALID_NODE;        
     }
@@ -312,15 +312,15 @@ ForceConnect(tree_t     tree, //NOTE -  MAKE VERIFICATOR
              edge_dir_e new_direction)
 {
     ASSERT(tree);
-
+    
     node_s* current_node = &(tree->nodes_array[current_index]);
     node_s* node_array = tree->nodes_array;
-    
-    RETURN_IF_NODE_BAD(current_index);
+
+    RETURN_IF_NODE_BAD(current_index);    
     RETURN_IF_NODE_BAD(new_parent);
 
     if (new_direction == EDGE_DIR_NO_DIRECTION)
-    {
+    {   
         return TREE_RETURN_INCORRECT_VALUE;
     }
 

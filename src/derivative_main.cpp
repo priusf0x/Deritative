@@ -36,6 +36,7 @@ main()
     if ((error_number = ConvertToGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
     {
         fprintf(stderr, "Read Error: %d\n", error_number);
+        DerivativeDestroy(&derivative);
 
         return error_number;
     }   
@@ -46,6 +47,7 @@ main()
             != DERIVATIVE_RETURN_SUCCESS))
     {
         fprintf(stderr, "Derivate Error: %d\n", error_number);
+        DerivativeDestroy(&derivative);
 
         return error_number;
     }
@@ -53,7 +55,8 @@ main()
     if ((error_number = SimplifyGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
     {
         printf("Simplify Error:%d\n", error_number);
-
+        DerivativeDestroy(&derivative);
+        
         return error_number;
     }
 

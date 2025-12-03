@@ -33,7 +33,7 @@ const operation_info_s OPERATION_INFO[] =
     {OPERATOR_DIV      , {"/"  ,     1} ,COMP_OPTION(CalculateDiv, TakeDivDerivative  )},
     {OPERATOR_SIN      , {"sin",     3} ,COMP_OPTION(CalculateSin, TakeSinDerivative  )},
     {OPERATOR_COS      , {"cos",     3} ,COMP_OPTION(CalculateCos, TakeCosDerivative  )},
-    {OPERATOR_POWER    , {"^"  ,     1} ,COMP_OPTION(CalculatePow, NULL               )},
+    {OPERATOR_POWER    , {"^"  ,     1} ,COMP_OPTION(CalculatePow, TakePowDerivative  )},
     {OPERATOR_LN       , {"ln" ,     2} ,COMP_OPTION(CalculateLn , TakeLnDerivative   )},
     {OPERATOR_EXP      , {"exp",     3} ,COMP_OPTION(CalculateExp, TakeExpDerivative  )}
 };

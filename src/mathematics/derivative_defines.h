@@ -75,6 +75,8 @@ GetVarNodeHash(ssize_t current_node, derivative_t derivative);
 #define COS__(_FIRST_)           DerivativeAddOperation(derivative, (_FIRST_),\
                                                       NO_LINK,    OPERATOR_COS)
 #define EXP__(_FIRST_)           DerivativeAddOperation(derivative, (_FIRST_),\
-                                                      NO_LINK,    OPERATOR_EXP)
-                                                    
+                                                      NO_LINK,    OPERATOR_EXP)                                                    
+#define LN__(_FIRST_)           DerivativeAddOperation(derivative, (_FIRST_),\
+                                                      NO_LINK,    OPERATOR_LN)
+
 #endif // DERIVATIVE_DEFINES

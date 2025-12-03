@@ -39,18 +39,11 @@ No file latex_dump.aux.
 (/usr/share/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg)))
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd)
 (/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd)
-
-Package amsmath Warning: Foreign command \over;
-(amsmath)                \frac or \genfrac should be used instead
-(amsmath)                 on input line 10.
-
-
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./latex_dump.aux) )</us
 r/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-
 dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type
 1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><
-/usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on latex_dump.pdf (1 page, 62219 bytes).
+ts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
+Output written on latex_dump.pdf (1 page, 53108 bytes).
 Transcript written on latex_dump.log.
