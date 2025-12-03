@@ -11,13 +11,9 @@
 
 static const char* formula_file_name = "pletnev.zov";
 
-// WISH_LIST
-// 1 priority Strings_var, name_table, ask user variable
-// 2 priotity clean_main, make functions 
+//make functions 
 // 3 priority Fill function, calculation with vars
 // 4 GRRRRRROROOOOOOOQQQQQ 
-// 4 
-
 
 int
 main()
@@ -30,51 +26,39 @@ main()
     int error_number = 0;
 
     if ((error_number = DerivativeInit(&derivative, start_tree_size, 
-                                        formula_file_name)) != 0)
+                        formula_file_name)) != DERIVATIVE_RETURN_SUCCESS)
     {   
-        printf("R->L %d\n", error_number);
+        fprintf(stderr, "Init Error: %d\n", error_number);
 
         return error_number;
     }
 
-    ConvertToGraph(derivative);    
+    if ((error_number = ConvertToGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
+    {
+        fprintf(stderr, "Read Error: %d\n", error_number);
+
+        return error_number;
+    }   
 
     LogDeritativeInLatex(derivative, 0, NULL);
- 
-    TreeDump(derivative->ariphmetic_tree);
 
-    name_table_t name_table = NULL;
+    if ((error_number = TakeDerivative(derivative, "x") // need to be added gui inteface??? 
+            != DERIVATIVE_RETURN_SUCCESS))
+    {
+        fprintf(stderr, "Derivate Error: %d\n", error_number);
 
-    InitNameTable(&name_table, 3);
+        return error_number;
+    }
 
-    string_s new_name_1 = {"Hello", 5};
-    string_s new_name_2 = {"Bye", 3};
-    string_s new_name_3 = {"Hello", 5};
-    string_s new_name_4 = {"Hello", 5};
-    string_s new_name_5 = {"Bye", 3};
-    
-    AddNameInTable(&new_name_1, 3, name_table);
-    AddNameInTable(&new_name_2, 3, name_table);
-    AddNameInTable(&new_name_3, 3, name_table);
-    AddNameInTable(&new_name_4, 3, name_table);
-    AddNameInTable(&new_name_5, 3, name_table);
+    if ((error_number = SimplifyGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
+    {
+        printf("Simplify Error:%d\n", error_number);
 
-    NameTableDump(name_table);
+        return error_number;
+    }
 
-    DestroyNameTable(&name_table);
-
-    // ssize_t output = TakeExpressionDerivative(derivative, 0);   
-    // derivative->ariphmetic_tree->nodes_array[output].parent_index = 0;
-    // derivative->ariphmetic_tree->nodes_array[0].left_index = output;
-
-    // SimplifyNeutralMultipliers(derivative, 0);
-  
-    // SimplifyConst(derivative, 0);
-
-    // LogDeritativeInLatex(derivative, 0, NULL);
-
+    LogDeritativeInLatex(derivative, 0, NULL);
     DerivativeDestroy(&derivative);
-
     EndLatexDocument(NULL);
 
     return 0;

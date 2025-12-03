@@ -7,6 +7,7 @@
 #include "expression.h"
 #include "my_string.h"
 #include "buffer.h"
+#include "name_space.h"
 
 // ======================== ARIPHMETIC_FUNCTION_ENUM ==========================
 
@@ -16,6 +17,7 @@ enum derivative_return_e
     DERIVATIVE_RETURN_READ_ERROR,
     DERIVATIVE_RETURN_TREE_ERROR,
     DERIVATIVE_RETURN_ALLOCATION_ERROR, 
+    DERIVATIVE_RETURN_NAME_TABLE_ERROR,
     DERIVATIVE_RETURN_UNDEFINED_OPERATION
 };
 
@@ -23,8 +25,10 @@ enum derivative_return_e
 
 struct derivative_s
 {
-    tree_t ariphmetic_tree;
-    buffer_t buffer;
+    tree_t              ariphmetic_tree;
+    buffer_t            buffer;
+    name_table_t        name_table;
+    unsigned int        variable_hash;
     derivative_return_e error;
 };
 
@@ -32,7 +36,8 @@ typedef derivative_s* derivative_t;
 
 // ========================== ARIPHMETIC_FUNCTIONS ============================
 
-derivative_return_e DerivativeInit(derivative_t* deritative, size_t start_tree_size, const char* file_name);
+derivative_return_e DerivativeInit(derivative_t* deritative, size_t start_tree_size, 
+                                   const char* file_name);
 derivative_return_e DerivativeDestroy(derivative_t* deritative);
 
 #endif // ARIPHMETIC_OPERATIONS_H

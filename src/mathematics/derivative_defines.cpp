@@ -48,7 +48,7 @@ DerivativeAddConst(derivative_t derivative,
 ssize_t 
 DerivativeAddVar(derivative_t derivative,
                  variable_s*  variable)
-{ //FIXME -  add work with name space here
+{ 
     ASSERT(derivative != NULL);
     RETURN_NO_LINK_IF_ERROR;
 
@@ -89,4 +89,15 @@ DerivativeAddOperation(derivative_t derivative,
     }
 
     return op_node.index_in_tree;
+}
+
+unsigned int 
+GetVarNodeHash(ssize_t      current_node,
+               derivative_t derivative)
+{
+    ASSERT(derivative != NULL);
+    string_s var_string = NODE(current_node)->node_value.expression.
+                            variable.variable_name;
+
+    return MurmurHash2(var_string.string_source, (unsigned int) var_string.string_size);
 }

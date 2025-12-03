@@ -41,7 +41,43 @@ CheckNodeConstAndEq(const derivative_t derivative,
 #define CHECK_ONE(_NODE_)  (CheckNodeConstAndEq(derivative, _NODE_, (double) 1))
 #define CHECK_ZERO(_NODE_) (CheckNodeConstAndEq(derivative, _NODE_, (double) 0))
 
+static ssize_t
+SimplifyNeutralMultipliers(derivative_t derivative, ssize_t current_node);
+static ssize_t
+SimplifyConst(derivative_t derivative, ssize_t current_node);
+
 // =========================== SIMPLIFICATION =================================
+
+derivative_return_e
+SimplifyGraph(derivative_t derivative)
+{
+    ASSERT(derivative != NULL);
+
+    size_t previous_size = 0;
+    size_t current_size = 0;
+
+    do
+    {
+        previous_size = current_size;
+
+        SimplifyConst(derivative, 0);
+        if (IF_DERIVATIVE_FAILED)
+        {
+            return derivative->error;
+        }
+        SimplifyNeutralMultipliers(derivative, 0);
+        if (IF_DERIVATIVE_FAILED)
+        {
+            return derivative->error;
+        }
+
+        current_size = derivative->ariphmetic_tree->nodes_count;
+
+    } while (previous_size != current_size);
+
+    
+    return DERIVATIVE_RETURN_SUCCESS;
+}   
 
 static void  
 ChangeChildNode(derivative_t derivative,
@@ -106,9 +142,9 @@ CalculateLn(derivative_t derivative, ssize_t current_node)
 
 inline static ssize_t
 CalculateExp(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(log(GET_CONST_VAL__(L_O)))); } 
+{ REPLACE(CONST__(exp(GET_CONST_VAL__(L_O)))); } 
 
-struct op_calculation // maybe use conditional compilation 
+struct op_calculation  
 {
     operations_e operation;
     ssize_t (*calc_function) (derivative_t, ssize_t);
@@ -117,7 +153,7 @@ struct op_calculation // maybe use conditional compilation
 #define _CALCULATION_
 #include "operation_info.h"
 
-ssize_t
+static ssize_t
 SimplifyConst(derivative_t derivative,
               ssize_t      current_node)
 {
@@ -219,7 +255,14 @@ SimplifyMulOnOne(derivative_t derivative,
     return NO_LINK;
 }
 
-ssize_t
+static ssize_t
+SimplifyZeroDiv(derivative_t derivative,
+                ssize_t      current_node)
+{
+    REPLACE(CONST__(0));
+}
+
+static ssize_t
 SimplifyNeutralMultipliers(derivative_t derivative,
                            ssize_t      current_node)
 {
@@ -263,6 +306,11 @@ SimplifyNeutralMultipliers(derivative_t derivative,
                  (CHECK_ONE(node->left_index) || CHECK_ONE(node->right_index))) 
         {
             return SimplifyMulOnOne(derivative, current_node);
+        }
+        else if (CHECK_OP(OPERATOR_DIV, current_node) &&
+                 CHECK_ZERO(node->left_index)) 
+        {
+            return SimplifyZeroDiv(derivative, current_node);
         }
     }
 

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "expression.h"
+#include "name_space.h"
 
 enum edge_dir_e
 {
@@ -20,6 +21,7 @@ enum tree_return_e
     TREE_RETURN_INVALID_NODE,
     TREE_RETURN_OPEN_FILE_ERROR,
     TREE_RETURN_CLOSE_FILE_ERROR,
+    TREE_RETURN_NAME_TABLE_ERROR,
     TREE_RETURN_EMPTY_TREE
 };
 
@@ -37,9 +39,10 @@ struct node_s
 
 struct tree_s
 {
-    node_s* nodes_array;
-    size_t  nodes_count;
-    size_t  nodes_capacity;
+    node_s*      nodes_array;
+    size_t       nodes_count;
+    size_t       nodes_capacity;
+    name_table_t name_table;
 };
 
 typedef tree_s* tree_t;

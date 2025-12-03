@@ -37,6 +37,8 @@ const operation_info_s OPERATION_INFO[] =
     {OPERATOR_LN       , {"ln" ,     2} ,COMP_OPTION(CalculateLn , TakeLnDerivative   )},
     {OPERATOR_EXP      , {"exp",     3} ,COMP_OPTION(CalculateExp, TakeExpDerivative  )}
 };
+const size_t OPERATION_COUNT = sizeof(OPERATION_INFO) / sizeof(OPERATION_INFO[0]);
+
 #pragma GCC diagnostic warning "-Wwrite-strings"
 
 #undef CONDITIONAL_COMPILATION

@@ -5,12 +5,7 @@
 
 #include "derivative.h"
 
-ssize_t
-SimplifyNeutralMultipliers(derivative_t derivative,
-                           ssize_t      current_node);
-
-ssize_t
-SimplifyConst(derivative_t derivative,
-              ssize_t      current_node);
+derivative_return_e
+SimplifyGraph(derivative_t derivative);
 
 #endif // SIMPLIFY_H

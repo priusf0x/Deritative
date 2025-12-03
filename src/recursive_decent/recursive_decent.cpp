@@ -12,6 +12,7 @@
 #include "expression.h"
 #include "tree.h"
 #include "tools.h"
+#include "operation_info.h"
 
 // ============================= HELPERS ======================================
 
@@ -53,15 +54,6 @@ struct key_words_function_s
     operations_e operation;
 };
 
-const struct key_words_function_s FUNCTIONS[] = // FIXME: переделать в новую таблицу 
-{// FUNCTION_NAME   NAME_LENGHT        OPERATION
-    {       "sin",            3,    OPERATOR_SIN},
-    {       "cos",            3,    OPERATOR_COS},
-    {        "ln",            2,     OPERATOR_LN},
-    {       "exp",            3,    OPERATOR_EXP}
-};
-const size_t FUNCTIONS_COUNT = sizeof(FUNCTIONS) / sizeof(FUNCTIONS[0]);
-
 // ============================= GET_FUNCTIONS ================================
 
 static ssize_t GetE(derivative_t derivative);
@@ -72,15 +64,18 @@ static ssize_t GetN(derivative_t derivative);
 static operations_e 
 CheckIfFunction(derivative_t derivative)
 {
-    for (size_t index = 0; index < FUNCTIONS_COUNT; index++)
+    string_s compare_string = {};
+
+    for (size_t index = 1; index < OPERATION_COUNT; index++)
     {
-        if (StrCmpWithEnding(CURRENT_STRING, FUNCTIONS[index].function_name,
-                     FUNCTIONS[index].name_len, " \r\n\t("))
+        compare_string = OPERATION_INFO[index].operation_name;
+        if (StrCmpWithEnding(CURRENT_STRING, compare_string.string_source, 
+                compare_string.string_size, " \r\n\t("))
         {
-            SkipNSymbols(derivative->buffer, FUNCTIONS[index].name_len);
+            SkipNSymbols(derivative->buffer, compare_string.string_size);
             SkipSpacesInBuffer(derivative->buffer);
 
-            return FUNCTIONS[index].operation;
+            return OPERATION_INFO[index].operation;
         }
     }
 

@@ -45,6 +45,18 @@ DerivativeInit(derivative_t* derivative,
         return output;
     }
 
+    const size_t start_name_table_size = 10;
+    if (InitNameTable(&(*derivative)->name_table, start_name_table_size) != 0)
+    {
+        BufferDestroy(&(*derivative)->buffer); 
+        TreeDestroy((*derivative)->ariphmetic_tree);
+        free(*derivative);
+
+        return DERIVATIVE_RETURN_NAME_TABLE_ERROR;
+    }
+
+    (*derivative)->ariphmetic_tree->name_table = (*derivative)->name_table;    
+
     return DERIVATIVE_RETURN_SUCCESS;
 }
 
@@ -54,7 +66,7 @@ DerivativeDestroy(derivative_t* derivative)
     if ((derivative != NULL) && (*derivative != NULL))
     {
         BufferDestroy(&(*derivative)->buffer);
-        
+        DestroyNameTable(&(*derivative)->name_table);
         TreeDestroy((*derivative)->ariphmetic_tree);
         free(*derivative);
     }

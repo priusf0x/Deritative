@@ -5,6 +5,7 @@
 
 #include "Assert.h"
 #include "stack.h"
+#include "name_space.h"
 
 static tree_return_e SetTreeSize(tree_t tree, size_t  new_size);
 static tree_return_e NumerizeElements(tree_t tree, size_t start_index);
@@ -55,10 +56,18 @@ static void
 ClearNode(tree_t tree,
           size_t current_node)
 {
-    tree->nodes_array[current_node].right_index = -1;
-    tree->nodes_array[current_node].left_index = -1;
-    tree->nodes_array[current_node].parent_connection = EDGE_DIR_NO_DIRECTION;
-    tree->nodes_array[current_node].node_value = {};
+    node_s* node = &tree->nodes_array[current_node]; 
+
+    if (node->node_value.expression_type == EXPRESSION_TYPE_VAR)
+    {
+        DeleteElementInTable(node->node_value.expression.variable.name_table_index,
+                                 tree->name_table);
+    }
+
+    node->right_index = -1;
+    node->left_index = -1;
+    node->parent_connection = EDGE_DIR_NO_DIRECTION;
+    node->node_value = {};
 }
 
 static tree_return_e
@@ -247,6 +256,17 @@ InitNode(tree_t  tree,
             = (ssize_t) node->index_in_tree;
     }
 
+    if (node->node_value.expression_type == EXPRESSION_TYPE_VAR)
+    {
+        if (AddNameInTable(&node->node_value.expression.variable.variable_name,
+                                &node->node_value.expression.variable.name_table_index,
+                                    node->index_in_tree, tree->name_table) != 0)
+        {
+
+            return TREE_RETURN_NAME_TABLE_ERROR;
+        }
+    }
+
     memcpy(tree->nodes_array + node->index_in_tree, node, sizeof(node_s));
 
     return TREE_RETURN_SUCCESS;
@@ -407,7 +427,6 @@ DeleteSubgraph(tree_t tree,
         }
 
         ClearNode(tree, current_element);
-        
         tree->nodes_array[current_element].parent_index =
             (ssize_t) tree->nodes_array[0].parent_index;
         tree->nodes_array[0].parent_index = (ssize_t) current_element;

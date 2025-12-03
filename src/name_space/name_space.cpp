@@ -138,28 +138,51 @@ NameTableDump(name_table_t name_table)
     fprintf(stderr, "%s", table_ending);
 }
 
-// ================================ ADDIND_NAME ===============================
+// ============================ ELEMENT_ADD_DELETE ============================
 
 static ssize_t 
-FindElementInTable(unsigned int hash,
-                   name_table_t name_table)
+FindAnyElementInTable(unsigned int hash,
+                      name_table_t name_table)
 {
     ASSERT(name_table != NULL);
 
-    ssize_t last_element = NO_LINK;
+    ssize_t any_element = NO_LINK;
 
-    for (ssize_t index = 0; index < (ssize_t) name_table->name_table_capacity; index++)
+    for (ssize_t index = 0; index < (ssize_t) name_table->name_table_capacity;
+             index++)
     {
         if (name_table->name_array[index].hash == hash)
         {
-            last_element = index;
+            any_element = index;
         }
     }
 
-    return last_element;
+    return any_element;
 }
 
-static void
+static ssize_t 
+GetLastElement(unsigned int hash,
+               name_table_t name_table)
+{
+    ASSERT(name_table != NULL);
+
+    ssize_t last = FindAnyElementInTable(hash, name_table); 
+    ssize_t pre_last = last;
+    if (pre_last != NO_LINK)
+    {
+        last = name_table->name_array[pre_last].next_element;
+    }
+
+    while (last != NO_LINK)
+    {
+        pre_last = last;
+        last = name_table->name_array[pre_last].next_element;
+    }
+
+    return pre_last; 
+}
+
+static size_t 
 NewNameInit(string_s*    string,
             name_value_t value,
             name_table_t name_table)
@@ -172,9 +195,9 @@ NewNameInit(string_s*    string,
     new_name.name_string = *string;
     new_name.hash = MurmurHash2(string->string_source, 
                                  (unsigned int) string->string_size);
-    new_name.prev_element = FindElementInTable(new_name.hash, name_table);
-    ssize_t new_element_index = name_table->next_free;
-    
+    new_name.prev_element = GetLastElement(new_name.hash, name_table);
+    size_t new_element_index = (size_t) name_table->next_free;
+
     name_table->next_free = name_table->name_array[new_element_index].next_element;
     new_name.next_element = NO_LINK;
     new_name.value = value;
@@ -182,18 +205,22 @@ NewNameInit(string_s*    string,
     if (new_name.prev_element != NO_LINK)
     {
         name_table->name_array[new_name.prev_element].
-                                    next_element = new_element_index;
+                                    next_element = (ssize_t) new_element_index;
     }
 
     name_table->name_array[new_element_index] = new_name;
+
+    return new_element_index;
 }
 
 name_table_return_e 
 AddNameInTable(string_s*    string,
+               size_t*      index_in_name_table,
                name_value_t value,    
                name_table_t name_table)
 {
-    ASSERT(string);
+    ASSERT(string != NULL);
+    ASSERT(index_in_name_table != NULL);
 
     name_table_return_e output = NAME_TABLE_RETURN_SUCCESS;
 
@@ -207,7 +234,7 @@ AddNameInTable(string_s*    string,
         }
     }
 
-    NewNameInit(string, value, name_table);
+    *index_in_name_table = NewNameInit(string, value, name_table);
 
     name_table->name_count++;
 
@@ -215,4 +242,32 @@ AddNameInTable(string_s*    string,
 }
 
 name_table_return_e
-DeleteElementInTable
+DeleteElementInTable(size_t       name_index,
+                     name_table_t name_table)
+{
+    ASSERT(name_table);
+   
+    ssize_t next_element = name_table->name_array[name_index].next_element; 
+    ssize_t prev_element = name_table->name_array[name_index].prev_element; 
+    name_s* name_array = name_table->name_array;
+
+    if (next_element != NO_LINK)
+    {
+        name_array[next_element].prev_element = prev_element;
+    }
+
+    if (prev_element != NO_LINK)
+    {
+        name_array[prev_element].next_element = next_element;
+    }
+
+    name_array[name_index] = {};
+    
+    name_array[name_index].prev_element = NO_LINK;
+    name_array[name_index].next_element = name_table->next_free;
+    name_table->next_free = (ssize_t) name_index;
+
+    name_table->name_count--;
+
+    return NAME_TABLE_RETURN_SUCCESS;
+}

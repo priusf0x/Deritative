@@ -29,11 +29,19 @@ struct name_table_s
 };
 typedef name_table_s* name_table_t;
 
+// ============================ MEMORY_CONTROL ================================
+
 name_table_return_e InitNameTable(name_table_t* name_table, size_t start_size);
 name_table_return_e DestroyNameTable(name_table_t* name_table);\
+
+// ================================ NAME_TABLE_DUMP ===========================
+
 void NameTableDump(name_table_t name_table);
 
-name_table_return_e AddNameInTable(string_s* string, name_value_t value,
-                                   name_table_t name_table);
+// ============================ ELEMENT_ADD_DELETE ============================
+
+name_table_return_e DeleteElementInTable(size_t name_index, name_table_t name_table);
+name_table_return_e AddNameInTable(string_s* string, size_t* index_in_name_table, 
+                                   name_value_t value, name_table_t name_table);
 
 #endif // NAME_SPACE_H

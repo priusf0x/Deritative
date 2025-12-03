@@ -1,10 +1,12 @@
 #include "take_derivative.h"
 
+#include <string.h>
+
 #include "Assert.h"
 #include "derivative.h"
 #include "derivative_defines.h"
-#include "latex_dump.h"
 #include "tree.h"
+#include "latex_dump.h"
 #include "latex_dump.h"
 #include "simplify.h"
 
@@ -18,7 +20,14 @@ TakeConstDerivative(derivative_t derivative,
 static ssize_t
 TakeVarDerivative(derivative_t derivative,
                   ssize_t      current_node)
-{ REPLACE(CONST__(1)); }
+{
+    if (GetVarNodeHash(current_node, derivative) 
+        == derivative->variable_hash)
+    { REPLACE(CONST__(1)); }
+    else
+    { REPLACE(CONST__(0)); }
+}
+
 
 static ssize_t 
 TakePlusDerivative(derivative_t derivative,
@@ -71,7 +80,7 @@ struct function_derivative_s
 
 // ========================== MAIN_DERIVATIVE ================================
 
-ssize_t  // TODO: make static and add main take derivative function
+ssize_t
 TakeExpressionDerivative(derivative_t derivative,
                          ssize_t      current_node)
 {
@@ -113,3 +122,24 @@ TakeExpressionDerivative(derivative_t derivative,
     
     return NO_LINK;
 }
+
+derivative_return_e 
+TakeDerivative(derivative_t derivative,
+               char*  variable_name)
+{
+    ASSERT(derivative != NULL);
+    ASSERT(variable_name != NULL);
+
+    derivative->variable_hash = MurmurHash2(variable_name, 
+                                            (unsigned int) strlen(variable_name));
+
+    ssize_t output = TakeExpressionDerivative(derivative, 0);
+    if (output != NO_LINK)
+    {
+        derivative->ariphmetic_tree->nodes_array[output].parent_index = 0;
+        derivative->ariphmetic_tree->nodes_array[0].left_index = output;  
+    }
+
+    return derivative->error;
+}
+
