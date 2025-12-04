@@ -29,6 +29,7 @@ struct derivative_s
     buffer_t            buffer;
     name_table_t        name_table;
     unsigned int        variable_hash;
+    size_t              last_size;
     derivative_return_e error;
 };
 

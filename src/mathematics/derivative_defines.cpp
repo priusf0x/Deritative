@@ -4,6 +4,7 @@
 #include "derivative.h"
 #include "expression.h"
 #include "tools.h"
+#include "operation_info.h"
 
 ssize_t
 DerivativeCopy(derivative_t derivative,
@@ -101,3 +102,22 @@ GetVarNodeHash(ssize_t      current_node,
 
     return MurmurHash2(var_string.string_source, (unsigned int) var_string.string_size);
 }
+
+size_t 
+GetSubGraphLength(ssize_t      current_node,
+                  derivative_t derivative)
+{
+    ASSERT(derivative != NULL);
+
+    if (current_node == NO_LINK)
+    {
+        return 0;
+    }
+    size_t length = 0;
+    length += GetSubGraphLength(NODE(current_node)->left_index, derivative);  
+    length += GetSubGraphLength(NODE(current_node)->right_index, derivative);  
+
+    return length; 
+}
+
+

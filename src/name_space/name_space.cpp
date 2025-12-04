@@ -64,7 +64,6 @@ NumerizeElements(name_table_t name_table,
     }
 }
 
-
 static name_table_return_e
 SetNameTableSize(name_table_t name_table,
                  size_t       new_size)
@@ -112,7 +111,6 @@ PrintNameInfo(const name_s* name, size_t current_index)
     fprintf(stderr, "│%7ld", name->value);
     fprintf(stderr, "│%6ld", name->next_element);
     fprintf(stderr, "│%6ld│\n", name->prev_element);
-
 }
 
 void 
@@ -225,7 +223,7 @@ AddNameInTable(string_s*    string,
     name_table_return_e output = NAME_TABLE_RETURN_SUCCESS;
 
     if (name_table->name_count 
-        == name_table->name_table_capacity)
+            == name_table->name_table_capacity)
     {
         if ((output = SetNameTableSize(name_table, 2 * name_table->name_count))
                 != NAME_TABLE_RETURN_SUCCESS)

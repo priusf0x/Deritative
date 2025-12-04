@@ -5,8 +5,8 @@
 #include "Assert.h"
 #include "derivative.h"
 #include "derivative_defines.h"
+#include "tools.h"
 #include "tree.h"
-#include "latex_dump.h"
 #include "latex_dump.h"
 #include "simplify.h"
 
@@ -56,11 +56,10 @@ TakePowDerivative(derivative_t derivative,
       && NODE(R_O)->node_value.expression_type == EXPRESSION_TYPE_CONST)
     {REPLACE(CONST__(0));}
   else if (NODE(R_O)->node_value.expression_type == EXPRESSION_TYPE_CONST)
-    {REPLACE(MUL__(SUB__(c_R, 1), D__(c_L)));}
+    {REPLACE(MUL__(D__(c_L), MUL__(c_R, POW__(c_L, SUB__(c_R, CONST__(1))))));}
   else 
     {REPLACE(D__(EXP__(MUL__(LN__(c_L), c_R)))); }
 }
-
 
 static ssize_t 
 TakeSinDerivative(derivative_t derivative,
@@ -81,6 +80,8 @@ static ssize_t
 TakeExpDerivative(derivative_t derivative,
                   ssize_t      current_node)
 { REPLACE(MUL__(D__(c_L), EXP__(c_L))); }
+
+
 
 struct function_derivative_s
 {
@@ -104,12 +105,20 @@ TakeExpressionDerivative(derivative_t derivative,
         TreeDump(derivative->ariphmetic_tree);
     #endif
 
+    #ifndef NLATEX
+        if (GetSubGraphLength(0, derivative) != derivative->last_size)
+        {
+            derivative->last_size = GetSubGraphLength(0, derivative);
+            LogDeritativeInLatex(derivative, NULL);
+        }
+    #endif     
+
     if(current_node == 0)
     {
         current_node = derivative->ariphmetic_tree->
                             nodes_array[current_node].left_index;
     }
-
+    
     expression_s node_value = derivative->ariphmetic_tree->
                                 nodes_array[current_node].node_value;
 

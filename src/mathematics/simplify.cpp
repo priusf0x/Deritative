@@ -5,6 +5,7 @@
 #include "Assert.h"
 #include "derivative_defines.h"
 #include "derivative.h"
+#include "latex_dump.h"
 #include "expression.h"
 #include "math.h"
 #include "tools.h"
@@ -59,7 +60,9 @@ SimplifyGraph(derivative_t derivative)
     do
     {
         previous_size = current_size;
-
+        
+        LogDeritativeInLatex(derivative, NULL);
+        
         SimplifyConst(derivative, 0);
         if (IF_DERIVATIVE_FAILED)
         {
@@ -109,39 +112,39 @@ ChangeChildNode(derivative_t derivative,
 // ======================= CONSTANT_SIMPLIFICATION ============================
 
 inline static ssize_t
-CalculateSum(derivative_t derivative, ssize_t current_node)
+SimplifySum(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(GET_CONST_VAL__(L_O) + GET_CONST_VAL__(R_O))); } 
 
 inline static ssize_t
-CalculateSub(derivative_t derivative, ssize_t current_node)
+SimplifySub(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(GET_CONST_VAL__(L_O) - GET_CONST_VAL__(R_O))); } 
 
 inline static ssize_t
-CalculateMul(derivative_t derivative, ssize_t current_node)
+SimplifyMul(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(GET_CONST_VAL__(L_O) * GET_CONST_VAL__(R_O))); } 
 
 inline static ssize_t
-CalculateDiv(derivative_t derivative, ssize_t current_node)
+SimplifyDiv(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(GET_CONST_VAL__(L_O) / GET_CONST_VAL__(R_O))); } 
 
 inline static ssize_t
-CalculateSin(derivative_t derivative, ssize_t current_node)
+SimplifySin(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(sin(GET_CONST_VAL__(L_O)))); } 
 
 inline static ssize_t
-CalculateCos(derivative_t derivative, ssize_t current_node)
+SimplifyCos(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(cos(GET_CONST_VAL__(L_O)))); } 
 
 inline static ssize_t
-CalculatePow(derivative_t derivative, ssize_t current_node)
+SimplifyPow(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(pow(GET_CONST_VAL__(L_O), GET_CONST_VAL__(R_O)))); } 
 
 inline static ssize_t
-CalculateLn(derivative_t derivative, ssize_t current_node)
+SimplifyLn(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(log(GET_CONST_VAL__(L_O)))); } 
 
 inline static ssize_t
-CalculateExp(derivative_t derivative, ssize_t current_node)
+SimplifyExp(derivative_t derivative, ssize_t current_node)
 { REPLACE(CONST__(exp(GET_CONST_VAL__(L_O)))); } 
 
 struct op_calculation  
@@ -256,6 +259,13 @@ SimplifyMulOnOne(derivative_t derivative,
 }
 
 static ssize_t
+SimplifyPowOne(derivative_t derivative,
+               ssize_t      current_node)
+{
+    REPLACE(c_L);
+}
+
+static ssize_t
 SimplifyZeroDiv(derivative_t derivative,
                 ssize_t      current_node)
 {
@@ -311,6 +321,11 @@ SimplifyNeutralMultipliers(derivative_t derivative,
                  CHECK_ZERO(node->left_index)) 
         {
             return SimplifyZeroDiv(derivative, current_node);
+        }
+        else if (CHECK_OP(OPERATOR_POWER, current_node) &&
+                 CHECK_ONE(node->right_index)) 
+        {
+            return SimplifyPowOne(derivative, current_node);
         }
     }
 

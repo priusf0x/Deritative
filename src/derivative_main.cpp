@@ -1,11 +1,12 @@
 #include "derivative.h"
 
+#include "derivative_defines.h"
 #include "tree.h"
 #include "simple_parser.h"
 #include "my_string.h"
 #include "tools.h"
-#include "latex_dump.h"
 #include "take_derivative.h"
+#include "latex_dump.h"
 #include "simplify.h"
 #include "recursive_decent.h"
 
@@ -13,7 +14,7 @@ static const char* formula_file_name = "pletnev.zov";
 
 //make functions 
 // 3 priority Fill function, calculation with vars
-// 4 GRRRRRROROOOOOOOQQQQQ 
+// 4 Add fun dump, tailor, etc, GRRRRRROROOOOOOOQQQQQ 
 
 int
 main()
@@ -41,7 +42,7 @@ main()
         return error_number;
     }   
 
-    LogDeritativeInLatex(derivative, 0, NULL);
+    LogDeritativeInLatex(derivative, NULL);
 
     if ((error_number = TakeDerivative(derivative, "x") // need to be added gui inteface??? 
             != DERIVATIVE_RETURN_SUCCESS))
@@ -60,7 +61,7 @@ main()
         return error_number;
     }
 
-    LogDeritativeInLatex(derivative, 0, NULL);
+    LogDeritativeInLatex(derivative, NULL);
     DerivativeDestroy(&derivative);
     EndLatexDocument(NULL);
 

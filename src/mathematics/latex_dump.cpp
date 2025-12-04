@@ -7,23 +7,20 @@
 #include "Assert.h"
 #include "derivative.h"
 #include "tools.h"
+#include "derivative_defines.h"
+#include "operation_info.h"
 
 static const char* latex_log_file_name = "logs/latex_dump.tex"; 
 
 void static 
 WriteConstInFile(derivative_t deritative,
-                 size_t       current_node, 
+                 size_t       current_node,
                  FILE*        output_file);
 
 void static 
 WriteVarInFile(const derivative_t deritative,
                size_t             current_node,
                FILE*              output_file);
-
-void static 
-WriteOperationInFile(derivative_t deritative,
-                     size_t       current_node,
-                     FILE*        output_file);
 
 static FILE*
 GetLatexLogFile();
@@ -37,7 +34,6 @@ WriteExpression(derivative_t deritative,
 
 void
 LogDeritativeInLatex(derivative_t deritative,
-                     size_t       current_node,
                      FILE*        output_file)
 {
     ASSERT(deritative != NULL);
@@ -51,13 +47,8 @@ LogDeritativeInLatex(derivative_t deritative,
         }
     }
 
-    node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
-    
-    if ((current_node == 0) 
-        && (node.left_index != NO_LINK))
-    {
-        current_node = (size_t) node.left_index;
-    }
+    node_s node_0 = deritative->ariphmetic_tree->nodes_array[0]; 
+    size_t current_node = (size_t) node_0.left_index;
     
     fprintf(output_file, "\\begin{equation}{\n ");
     WriteExpression(deritative, (ssize_t) current_node, output_file);
@@ -83,11 +74,6 @@ SetLogFileName(const char* new_name)
 
 
 // ============================ DUMP_HELPERS ==================================
-
-void static  
-WriteSubExpression(derivative_t deritative,
-                   ssize_t      current_node,
-                   FILE*        output_file);
 
 void 
 StartLatexDocument(FILE* output_file)
@@ -135,6 +121,13 @@ EndLatexDocument(FILE* output_file)
     SystemCall("rm *.aux *.log >latex_output.log");
 }
 
+// ========================= WRITE_FUNCTIONS_HELPERS ==========================
+
+void static 
+PrintOneArgFunction(derivative_t derivative,
+                    size_t       current_node,
+                    FILE*        output);
+
 void static 
 WriteConstInFile(derivative_t deritative,
                  size_t       current_node, 
@@ -146,6 +139,7 @@ WriteConstInFile(derivative_t deritative,
     double number = deritative->ariphmetic_tree->
                 nodes_array[current_node].node_value.expression.constant;
 
+    fprintf(output_file, "{");
     if(CheckIfInteger(number))
     {
         fprintf(output_file, "%ld", (long) number);
@@ -154,6 +148,7 @@ WriteConstInFile(derivative_t deritative,
     {
         fprintf(output_file, "%f", number);
     }
+    fprintf(output_file, "}");
 }
 
 void static 
@@ -164,88 +159,112 @@ WriteVarInFile(const derivative_t deritative,
     ASSERT(deritative != NULL);
     ASSERT(output_file != NULL);
 
+    fprintf(output_file, "{");
     string_s string = deritative->ariphmetic_tree->nodes_array[current_node]
                             .node_value.expression.variable.variable_name;
-
     PrintString(&string, output_file);
+    fprintf(output_file, "}");
 }
 
 void static 
-WriteOperationInFile(derivative_t deritative,
+WriteOperationInFile(derivative_t derivative,
+                     size_t       current_node,
+                     FILE*        output_file);
+
+void static 
+PrintOneArgFunction(derivative_t derivative,
+                    size_t       current_node,
+                    FILE*        output)
+{
+    ASSERT(derivative != NULL);
+
+    operations_e node_op = NODE(current_node)->node_value.expression.operation;
+
+    fprintf(output, "%s{(", OPERATION_INFO[node_op].latex_dump_name);
+    WriteExpression(derivative, NODE(current_node)->left_index, output);
+    fprintf(output, ")}");
+}
+
+static bool 
+CheckIfBracket(derivative_t derivative,
+               ssize_t      current_node,
+               ssize_t      next_node)
+{    
+    if (NODE(next_node)->node_value.expression_type 
+            != EXPRESSION_TYPE_OPERATOR)
+    {
+        return false;
+    }
+
+    operations_e node_op = NODE(current_node)->node_value.
+                                            expression.operation;
+    operations_e next_node_op = NODE(next_node)->node_value.
+                                                expression.operation;
+
+    if (node_op == next_node_op)
+    {
+        return false;
+    }
+
+    if (OPERATION_INFO[next_node_op].priority 
+            > OPERATION_INFO[node_op].priority)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void static 
+PrintTwoArgFunction(derivative_t derivative,
+                    ssize_t      current_node,
+                    FILE*        output)
+{
+    ASSERT(derivative != NULL);
+
+    operations_e node_op = NODE(current_node)->node_value.expression.operation;
+    bool bracket_l = CheckIfBracket(derivative, current_node, L_O);
+    bool bracket_r = CheckIfBracket(derivative, current_node, R_O);
+    
+    fprintf(output, "{{");
+    if (bracket_l)
+    {fprintf(output, "(");}
+    WriteExpression(derivative, NODE(current_node)->left_index, output);
+    if (bracket_l)
+    {fprintf(output, ")");}
+    fprintf(output, "}");
+    fprintf(output, "%s", OPERATION_INFO[node_op].latex_dump_name);
+    fprintf(output, "{");
+    if (bracket_r)
+    {fprintf(output, "(");}
+    WriteExpression(derivative, NODE(current_node)->right_index, output);
+    if (bracket_r)
+    {fprintf(output, ")");}
+    fprintf(output, "}}");
+}
+
+void static 
+WriteOperationInFile(derivative_t derivative,
                      size_t       current_node,
                      FILE*        output_file)
 {
-    ASSERT(deritative != NULL);
+    ASSERT(derivative != NULL);
     ASSERT(output_file != NULL);
 
-    node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
-    expression_s expr = node.node_value;
+    operations_e node_op = NODE(current_node)->node_value.expression.operation;
+    size_t argc = OPERATION_INFO[node_op].argc;
 
-    const char* undefined_message = "undefined blyat";
-    switch(expr.expression.operation)
+    switch(argc)
     {
-        case OPERATOR_PLUS:
-            WriteExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, " + ");
-            WriteExpression(deritative, node.right_index, output_file);
+        case 1:
+            PrintOneArgFunction(derivative, current_node, output_file);
+            break;
+        case 2:
+            PrintTwoArgFunction(derivative, current_node, output_file);
             break;
 
-        case OPERATOR_MINUS:    
-            WriteSubExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, " - ");
-            WriteSubExpression(deritative, node.right_index, output_file);
-            break;
-
-        case OPERATOR_MUL:
-            WriteSubExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, " \\times ");
-            WriteSubExpression(deritative, node.right_index, output_file);
-            break;
-
-        case OPERATOR_DIV: 
-            fprintf(output_file, "{");
-            WriteExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, " \\over ");
-            WriteExpression(deritative, node.right_index, output_file);
-            fprintf(output_file, "}");
-            break;
-
-        case OPERATOR_SIN:
-            fprintf(output_file, " \\sin{ ");
-            WriteSubExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, "}");
-            break;
-
-        case OPERATOR_COS:
-            fprintf(output_file, " \\cos{ ");
-            WriteSubExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, "}");
-            break;
-
-        case OPERATOR_POWER:
-            WriteSubExpression(deritative, node.left_index, output_file); 
-            fprintf(output_file, "^{ ");
-            WriteExpression(deritative, node.right_index, output_file);
-            fprintf(output_file, "}");
-            break;
-
-        case OPERATOR_LN:
-            fprintf(output_file, "\\ln(");
-            WriteExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, ")");
-            break;
-
-        case OPERATOR_EXP:
-            fprintf(output_file, "e^{ ");
-            WriteExpression(deritative, node.left_index, output_file);
-            fprintf(output_file, "}");
-            break;
-
-        case OPERATOR_UNDEFINED:
-            fprintf(output_file, "%s", undefined_message);
-            break;
-
-        default: break;
+        case 0:
+        default: return;
     }
 }
 
@@ -283,43 +302,4 @@ WriteExpression(derivative_t deritative,
 
         default: break;
     }
-
 }
-
-static void
-WriteSubExpression(derivative_t deritative,
-                   ssize_t      current_node,
-                   FILE*        output_file)
-{
-    ASSERT(deritative != NULL);
-    ASSERT(output_file != NULL);
-
-    if (current_node == NO_LINK)
-    {
-
-        return;
-    }
-
-    node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
-
-    bool is_single = false;
-    
-    if ((node.right_index == NO_LINK) 
-        || (node.left_index == NO_LINK))
-    {
-        is_single = true;
-    }
-
-    if (!is_single)
-    {
-        fprintf(output_file, "{(");
-    }
-
-    WriteExpression(deritative, current_node, output_file);
-
-    if (!is_single)
-    {
-        fprintf(output_file, ")}");
-    }
-}
-

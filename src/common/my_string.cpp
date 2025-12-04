@@ -67,8 +67,8 @@ StrCmpWithEnding(const char* string,
 bool
 CheckIfSymbVar(char symbol)
 {
-    if (('a' <= symbol && symbol >= 'z') 
-        || ('A' <= symbol && symbol >= 'Z')
+    if ((('a' <= symbol) && (symbol <= 'z')) 
+        || ('A' <= symbol && symbol <= 'Z')
         || (symbol == '_'))
     {
         return true; 
@@ -90,7 +90,7 @@ ReadVarString(char*       src,
     {
         lenght++;
         current_symbol = src[lenght]; 
-    }
+    } 
 
     *string_dst = {.string_source = src,
                    .string_size   = lenght};

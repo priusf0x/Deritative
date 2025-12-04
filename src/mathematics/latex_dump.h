@@ -7,8 +7,7 @@
 // ========================= FILE_LATEX_FEATURES ==============================
 
 void SetLogFileName(const char* new_name);
-void LogDeritativeInLatex(derivative_t deritative, size_t current_node,
-                          FILE* output_file);
+void LogDeritativeInLatex(derivative_t deritative, FILE* output_file);
 void StartLatexDocument(FILE* output_file);
 void EndLatexDocument(FILE* output_file);
 

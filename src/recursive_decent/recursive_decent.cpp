@@ -11,7 +11,10 @@
 #include "derivative.h"
 #include "expression.h"
 #include "tree.h"
+#include "simplify.h"
 #include "tools.h"
+
+#define _READER_
 #include "operation_info.h"
 
 // ============================= HELPERS ======================================
@@ -43,6 +46,7 @@ ReadVarInBuffer(variable_s* var,
                   &var->variable_name);
 
     buffer->current_position += var->variable_name.string_size;
+
     SkipSpacesInBuffer(buffer);
 
 }
@@ -66,16 +70,20 @@ CheckIfFunction(derivative_t derivative)
 {
     string_s compare_string = {};
 
-    for (size_t index = 1; index < OPERATION_COUNT; index++)
+    for (size_t index = 0; index < OPERATION_COUNT; index++)
     {
         compare_string = OPERATION_INFO[index].operation_name;
-        if (StrCmpWithEnding(CURRENT_STRING, compare_string.string_source, 
-                compare_string.string_size, " \r\n\t("))
-        {
-            SkipNSymbols(derivative->buffer, compare_string.string_size);
-            SkipSpacesInBuffer(derivative->buffer);
 
-            return OPERATION_INFO[index].operation;
+        if (compare_string.string_source != NULL)
+        {
+            if (StrCmpWithEnding(CURRENT_STRING, compare_string.string_source, 
+                    compare_string.string_size, " \r\n\t("))
+            {
+                SkipNSymbols(derivative->buffer, compare_string.string_size);
+                SkipSpacesInBuffer(derivative->buffer);
+
+                return OPERATION_INFO[index].operation;
+            }
         }
     }
 
@@ -171,11 +179,29 @@ GetP(derivative_t derivative)
     {
         variable_s var = {};
         ReadVarInBuffer(&var, derivative->buffer);
+
+        if (*CURRENT_STRING == '^')
+        {
+            SkipNSymbols(derivative->buffer, 1);
+            SkipSpacesInBuffer(derivative->buffer);
+
+            return POW__(VAR__(&var), GetP(derivative));
+        }
+
         return VAR__(&var);
     }
     else 
     {
-        return GetN(derivative);
+        ssize_t new_num = GetN(derivative);
+
+        if (*CURRENT_STRING == '^')
+        {
+            SkipNSymbols(derivative->buffer, 1);
+            SkipSpacesInBuffer(derivative->buffer);
+
+            return POW__(new_num, GetP(derivative));
+        }
+        return new_num;
     }
 }
 
@@ -189,8 +215,7 @@ GetT(derivative_t derivative)
     char last_symbol = *CURRENT_STRING;
     char operation = 0;
 
-    while((last_symbol == '*') || (last_symbol == '/')
-          || (last_symbol == '^'))
+    while((last_symbol == '*') || (last_symbol == '/'))
     {
         RETURN_NO_LINK_IF_ERROR;
 
@@ -211,10 +236,6 @@ GetT(derivative_t derivative)
 
             case '/':
                 last_add = DIV__(last_add, GetP(derivative));
-                break;
-
-            case '^':
-                last_add = POW__(last_add, GetP(derivative));
                 break;
 
             default: derivative->error = DERIVATIVE_RETURN_READ_ERROR;  
@@ -284,7 +305,7 @@ ConvertToGraph(derivative_t derivative)
 
         fprintf(stderr, "%s", error_read_message);
         BufferDump(derivative->buffer);
-    }
+    }   
 
     if (ForceConnect(derivative->ariphmetic_tree, readen_node, 0,
                                             EDGE_DIR_LEFT) != TREE_RETURN_SUCCESS)
@@ -292,9 +313,12 @@ ConvertToGraph(derivative_t derivative)
         return DERIVATIVE_RETURN_TREE_ERROR;
     }
 
-    #ifndef NDEBUG
-    BufferDump(derivative->buffer);
-    #endif 
+    derivative_return_e output = DERIVATIVE_RETURN_SUCCESS;
+
+    if ((output = SimplifyGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
+    {
+        return output;
+    }
 
     return DERIVATIVE_RETURN_SUCCESS; 
 }

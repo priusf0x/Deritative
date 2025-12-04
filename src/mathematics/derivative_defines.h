@@ -21,6 +21,8 @@ DerivativeAddVar(derivative_t derivative, variable_s* value);
 unsigned int 
 GetVarNodeHash(ssize_t current_node, derivative_t derivative);
 
+size_t 
+GetSubGraphLength(ssize_t current_node, derivative_t derivative);
 // ================================ DEFINE ====================================
 
 #define IF_DERIVATIVE_FAILED (derivative->error != DERIVATIVE_RETURN_SUCCESS)  
