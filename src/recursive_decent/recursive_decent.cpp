@@ -298,13 +298,15 @@ ConvertToGraph(derivative_t derivative)
 
     ssize_t readen_node = GetE(derivative);
 
-    if ((readen_node == NO_LINK) || IF_DERIVATIVE_FAILED)
+    if ((readen_node == NO_LINK) || IF_DERIVATIVE_FAILED 
+            || (*CURRENT_STRING != 0)) 
     {
         const char* error_read_message = RED      "Error was occupied while reading." 
                                          STANDARD "Buffer dump:\n" ;
-
         fprintf(stderr, "%s", error_read_message);
         BufferDump(derivative->buffer);
+
+        return DERIVATIVE_RETURN_READ_ERROR;
     }   
 
     if (ForceConnect(derivative->ariphmetic_tree, readen_node, 0,

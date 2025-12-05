@@ -61,7 +61,7 @@ SimplifyGraph(derivative_t derivative)
     {
         previous_size = current_size;
         
-        LogDeritativeInLatex(derivative, NULL);
+        LogDeritativeInLatex(derivative, 0, NULL);
         
         SimplifyConst(derivative, 0);
         if (IF_DERIVATIVE_FAILED)

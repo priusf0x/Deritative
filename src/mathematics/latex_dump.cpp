@@ -33,10 +33,11 @@ WriteExpression(derivative_t deritative,
                 FILE*        output_file);
 
 void
-LogDeritativeInLatex(derivative_t deritative,
+LogDeritativeInLatex(derivative_t derivative,
+                     ssize_t      current_node,
                      FILE*        output_file)
 {
-    ASSERT(deritative != NULL);
+    ASSERT(derivative != NULL);
     
     if (output_file == NULL)
     {
@@ -45,14 +46,16 @@ LogDeritativeInLatex(derivative_t deritative,
         {   
             return;
         }
+    }   
+    
+    if (current_node == 0)
+    {
+        current_node = NODE(0)->left_index;
     }
 
-    node_s node_0 = deritative->ariphmetic_tree->nodes_array[0]; 
-    size_t current_node = (size_t) node_0.left_index;
-    
-    fprintf(output_file, "\\begin{equation}{\n ");
-    WriteExpression(deritative, (ssize_t) current_node, output_file);
-    fprintf(output_file, "\n} \\end{equation}\n");
+    fprintf(output_file, "\\begin{align}\n");
+    WriteExpression(derivative, (ssize_t) current_node, output_file);
+    fprintf(output_file, "\n\\end{align}\n");
 }
 
 // =========================== FILE_USAGE =====================================
@@ -91,10 +94,10 @@ StartLatexDocument(FILE* output_file)
     "\\documentclass[a4paper,10pt]{article}\n"
     "\\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}\n"
     "\\usepackage[utf8]{inputenc}\n"
-    "\\usepackage{mathtools}\n"
-    "\\usepackage{amsmath,amsfonts,amssymb}\n"
-    "\\usepackage{float}\n"
-    "\\begin{document}{ \n \n";
+    "\\usepackage[T2A]{fontenc}\n"
+    "\\usepackage[russian]{babel}\n"
+    "\\usepackage{amsmath}\n"
+    "\\begin{document} \n\n";  
     
     fprintf(output_file, "%s", header_text);
 }
@@ -111,13 +114,17 @@ EndLatexDocument(FILE* output_file)
         }
     }
 
-    const char* end_text = "}\\end{document}\n";
+    const char* end_text = "\\end{document}\n";
 
     fprintf(output_file, "%s", end_text);
-
     fclose(output_file);
-    
-    SystemCall("pdflatex %s -f y 1  > latex_output", latex_log_file_name);
+
+    #ifdef TURN_GROQ
+        SystemCall("python src/groq/groq_help.py");
+    #endif 
+
+    SystemCall("pdflatex %s -f y -interaction=nonstopmode -halt-on-error \
+            -file-line-error 2 > latex_output.log", latex_log_file_name);
     SystemCall("rm *.aux *.log >latex_output.log");
 }
 
@@ -139,7 +146,6 @@ WriteConstInFile(derivative_t deritative,
     double number = deritative->ariphmetic_tree->
                 nodes_array[current_node].node_value.expression.constant;
 
-    fprintf(output_file, "{");
     if(CheckIfInteger(number))
     {
         fprintf(output_file, "%ld", (long) number);
@@ -148,7 +154,6 @@ WriteConstInFile(derivative_t deritative,
     {
         fprintf(output_file, "%f", number);
     }
-    fprintf(output_file, "}");
 }
 
 void static 
@@ -159,11 +164,9 @@ WriteVarInFile(const derivative_t deritative,
     ASSERT(deritative != NULL);
     ASSERT(output_file != NULL);
 
-    fprintf(output_file, "{");
     string_s string = deritative->ariphmetic_tree->nodes_array[current_node]
                             .node_value.expression.variable.variable_name;
     PrintString(&string, output_file);
-    fprintf(output_file, "}");
 }
 
 void static 
@@ -226,7 +229,7 @@ PrintTwoArgFunction(derivative_t derivative,
     bool bracket_l = CheckIfBracket(derivative, current_node, L_O);
     bool bracket_r = CheckIfBracket(derivative, current_node, R_O);
     
-    fprintf(output, "{{");
+    fprintf(output, "{");
     if (bracket_l)
     {fprintf(output, "(");}
     WriteExpression(derivative, NODE(current_node)->left_index, output);
@@ -240,7 +243,7 @@ PrintTwoArgFunction(derivative_t derivative,
     WriteExpression(derivative, NODE(current_node)->right_index, output);
     if (bracket_r)
     {fprintf(output, ")");}
-    fprintf(output, "}}");
+    fprintf(output, "}");
 }
 
 void static 

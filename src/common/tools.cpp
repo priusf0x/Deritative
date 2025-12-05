@@ -49,7 +49,7 @@ SystemCall(const char* command_tmp,
     va_list command_args;
     va_start(command_args, command_tmp);
 
-    const size_t command_size = 2 << 8;
+    const size_t command_size = 2 << 15;
     char command[command_size] = "";
     vsnprintf(command, command_size, command_tmp, command_args);
 

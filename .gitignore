@@ -2,4 +2,4 @@ latex_dump.pdf
 obj/
 .vscode 
 grammar.txt 
-logs/
+logs    /

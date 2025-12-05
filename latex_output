@@ -12,45 +12,128 @@ Document Class: article 2024/06/29 v1.4n Standard LaTeX document class
 (/usr/share/texmf-dist/tex/generic/iftex/ifvtex.sty
 (/usr/share/texmf-dist/tex/generic/iftex/iftex.sty)))
 (/usr/share/texmf-dist/tex/latex/base/inputenc.sty)
-(/usr/share/texmf-dist/tex/latex/mathtools/mathtools.sty
-(/usr/share/texmf-dist/tex/latex/tools/calc.sty)
-(/usr/share/texmf-dist/tex/latex/mathtools/mhsetup.sty)
-(/usr/share/texmf-dist/tex/latex/amsmath/amsmath.sty
-For additional information on amsmath, use the `?' option.
-(/usr/share/texmf-dist/tex/latex/amsmath/amstext.sty
-(/usr/share/texmf-dist/tex/latex/amsmath/amsgen.sty))
-(/usr/share/texmf-dist/tex/latex/amsmath/amsbsy.sty)
-(/usr/share/texmf-dist/tex/latex/amsmath/amsopn.sty)))
-(/usr/share/texmf-dist/tex/latex/amsfonts/amsfonts.sty)
-(/usr/share/texmf-dist/tex/latex/amsfonts/amssymb.sty)
 (/usr/share/texmf-dist/tex/latex/float/float.sty)
+(/usr/share/texmf-dist/tex/latex/was/upgreek.sty)
 (/usr/share/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
-No file latex_dump.aux.
+(./latex_dump.aux)
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
-(/usr/share/texmf-dist/tex/latex/graphics/graphicx.sty
-(/usr/share/texmf-dist/tex/latex/graphics/graphics.sty
-(/usr/share/texmf-dist/tex/latex/graphics/trig.sty)
-(/usr/share/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
-(/usr/share/texmf-dist/tex/latex/graphics-def/pdftex.def
-(/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
-[Loading MPS to PDF converter (version 2006.09.02).]
-))) (/usr/share/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
-(/usr/share/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg)))
-(/usr/share/texmf-dist/tex/latex/amsfonts/umsa.fd)
-(/usr/share/texmf-dist/tex/latex/amsfonts/umsb.fd)
 
-Package amsmath Warning: Foreign command \over;
-(amsmath)                \frac or \genfrac should be used instead
-(amsmath)                 on input line 10.
+! LaTeX Error: Environment dmath* undefined.
 
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.8 \begin{dmath*}
+                  
+? ! Missing $ inserted.
+<inserted text> 
+                $
+l.9 {sin{({x}+{y})}}-{{22}\over
+                               {({{x}^{4}}-{{1}\over{({x}-{33})}})}}
+? ! Extra }, or forgotten $.
+l.9 ...}\over{({{x}^{4}}-{{1}\over{({x}-{33})}})}}
+                                                  
+? 
+! LaTeX Error: \begin{document} ended by \end{dmath*}.
 
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.10 \end{dmath*}
+                 
+? ! Missing $ inserted.
+<inserted text> 
+                $
+l.10 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.10 \end{dmath*}
+                 
+? 
+! LaTeX Error: Environment dmath* undefined.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.11 \begin{dmath*}
+                   
+? ! Missing $ inserted.
+<inserted text> 
+                $
+l.12 {cos{({x}+{y})}}-{{({22}*{({{4}*{{x}^
+                                          {3}}}-{{1}\over{{({x}-{33})}^{2}}}...
+
+? ! Extra }, or forgotten $.
+l.12 {cos{({x}+{y})}}-{{({22}*{({{4}*{{x}^{3}}
+                                              }-{{1}\over{{({x}-{33})}^{2}}}...
+
+? ! Extra }, or forgotten $.
+l.12 {cos{({x}+{y})}}-{{({22}*{({{4}*{{x}^{3}}}
+                                               -{{1}\over{{({x}-{33})}^{2}}}...
+
+? ! Extra }, or forgotten $.
+l.12 ...*{{x}^{3}}}-{{1}\over{{({x}-{33})}^{2}}})}
+                                                  )}\over{{({{x}^{4}}-{{1}\o...
+
+? ! Extra }, or forgotten $.
+l.12 ...{x}^{3}}}-{{1}\over{{({x}-{33})}^{2}}})})}
+                                                  \over{{({{x}^{4}}-{{1}\ove...
+
+? ! Extra }, or forgotten $.
+l.12 ...{({{x}^{4}}-{{1}\over{({x}-{33})}})}^{2}}}
+                                                  
+? 
+! LaTeX Error: \begin{document} ended by \end{dmath*}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.13 \end{dmath*}
+                 
+? ! Missing $ inserted.
+<inserted text> 
+                $
+l.13 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.13 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.13 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.13 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.13 \end{dmath*}
+                 
+? ! Missing } inserted.
+<inserted text> 
+                }
+l.13 \end{dmath*}
+                 
+? 
 [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./latex_dump.aux) )</us
-r/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><
-/usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on latex_dump.pdf (1 page, 62865 bytes).
+r/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmr5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></
+usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb>
+Output written on latex_dump.pdf (1 page, 63119 bytes).
 Transcript written on latex_dump.log.

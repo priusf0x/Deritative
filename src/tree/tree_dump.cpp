@@ -1,4 +1,4 @@
-#ifndef NDEBUG
+#ifndef ND              EBUG
 
 #include "tree.h"
 

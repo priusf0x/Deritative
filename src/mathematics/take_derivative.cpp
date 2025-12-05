@@ -81,6 +81,11 @@ TakeExpDerivative(derivative_t derivative,
                   ssize_t      current_node)
 { REPLACE(MUL__(D__(c_L), EXP__(c_L))); }
 
+static ssize_t 
+TakeTgDerivative(derivative_t derivative,
+                  ssize_t      current_node)
+{ REPLACE(DIV__(D__(c_L), POW__(COS__(c_L), 2))); }
+
 
 
 struct function_derivative_s
@@ -105,19 +110,13 @@ TakeExpressionDerivative(derivative_t derivative,
         TreeDump(derivative->ariphmetic_tree);
     #endif
 
-    #ifndef NLATEX
-        if (GetSubGraphLength(0, derivative) != derivative->last_size)
-        {
-            derivative->last_size = GetSubGraphLength(0, derivative);
-            LogDeritativeInLatex(derivative, NULL);
-        }
-    #endif     
-
     if(current_node == 0)
     {
         current_node = derivative->ariphmetic_tree->
                             nodes_array[current_node].left_index;
     }
+
+    LogDeritativeInLatex(derivative, current_node, NULL);
     
     expression_s node_value = derivative->ariphmetic_tree->
                                 nodes_array[current_node].node_value;
