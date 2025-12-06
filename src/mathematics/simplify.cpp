@@ -9,6 +9,7 @@
 #include "expression.h"
 #include "math.h"
 #include "tools.h"
+#include "calculate_expression.h"
 
 // ======================= SIMPLIFICATION_HELPERS =============================
 
@@ -60,14 +61,15 @@ SimplifyGraph(derivative_t derivative)
     do
     {
         previous_size = current_size;
-        
         LogDeritativeInLatex(derivative, 0, NULL);
         
-        SimplifyConst(derivative, 0);
+        ssize_t output = SimplifyConst(derivative, 0);
+        NODE(0)->left_index = output;
         if (IF_DERIVATIVE_FAILED)
         {
             return derivative->error;
         }
+
         SimplifyNeutralMultipliers(derivative, 0);
         if (IF_DERIVATIVE_FAILED)
         {
@@ -111,65 +113,24 @@ ChangeChildNode(derivative_t derivative,
 
 // ======================= CONSTANT_SIMPLIFICATION ============================
 
-inline static ssize_t
-SimplifySum(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(GET_CONST_VAL__(L_O) + GET_CONST_VAL__(R_O))); } 
-
-inline static ssize_t
-SimplifySub(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(GET_CONST_VAL__(L_O) - GET_CONST_VAL__(R_O))); } 
-
-inline static ssize_t
-SimplifyMul(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(GET_CONST_VAL__(L_O) * GET_CONST_VAL__(R_O))); } 
-
-inline static ssize_t
-SimplifyDiv(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(GET_CONST_VAL__(L_O) / GET_CONST_VAL__(R_O))); } 
-
-inline static ssize_t
-SimplifySin(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(sin(GET_CONST_VAL__(L_O)))); } 
-
-inline static ssize_t
-SimplifyCos(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(cos(GET_CONST_VAL__(L_O)))); } 
-
-inline static ssize_t
-SimplifyPow(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(pow(GET_CONST_VAL__(L_O), GET_CONST_VAL__(R_O)))); } 
-
-inline static ssize_t
-SimplifyLn(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(log(GET_CONST_VAL__(L_O)))); } 
-
-inline static ssize_t
-SimplifyExp(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(exp(GET_CONST_VAL__(L_O)))); } 
-
-inline static ssize_t
-SimplifyTg(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(tan(GET_CONST_VAL__(L_O)))); } 
-
-inline static ssize_t
-SimplifyCtg(derivative_t derivative, ssize_t current_node)
-{ REPLACE(CONST__(1 / tan(GET_CONST_VAL__(L_O)))); } 
-
 struct op_calculation  
 {
     operations_e operation;
     ssize_t (*calc_function) (derivative_t, ssize_t);
 };
 
-#define _CALCULATION_
-#include "operation_info.h"
-
 static ssize_t
 SimplifyConst(derivative_t derivative,
               ssize_t      current_node)
 {
     ASSERT(derivative);
+    RETURN_NO_LINK_IF_ERROR;
 
+    if (current_node == 0)
+    {
+        current_node = L_O;
+    }
+    
     if (current_node == NO_LINK)
     {
         return NO_LINK;
@@ -181,25 +142,9 @@ SimplifyConst(derivative_t derivative,
 
     ChangeChildNode(derivative, current_node, SimplifyConst);
 
-    RETURN_NO_LINK_IF_ERROR;
-
-    expression_u node_value = derivative->ariphmetic_tree->
-                                nodes_array[current_node].node_value.expression;
-
-    if (CHECK_IF_TYPE(EXPRESSION_TYPE_OPERATOR, current_node))
+    if (CheckIfNoVar(current_node, derivative))
     {
-        if (node_value.operation == OPERATOR_UNDEFINED)
-        {
-            derivative->error = DERIVATIVE_RETURN_UNDEFINED_OPERATION;
-            return NO_LINK;
-        }
-
-        if (((R_O == NO_LINK) || CHECK_IF_TYPE(EXPRESSION_TYPE_CONST, R_O))
-            && ((L_O == NO_LINK || CHECK_IF_TYPE(EXPRESSION_TYPE_CONST, L_O))))
-        {
-            return OPERATION_INFO[node_value.operation]
-                        .op_function(derivative, current_node);
-        }
+        REPLACE(CONST__(CalculateTree(current_node, derivative)));
     }
 
     return current_node;

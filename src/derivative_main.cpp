@@ -9,6 +9,7 @@
 #include "latex_dump.h"
 #include "simplify.h"
 #include "recursive_decent.h"
+#include "calculate_expression.h"
 
 static const char* formula_file_name = "pletnev.zov";
 

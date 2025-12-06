@@ -108,7 +108,7 @@ PrintNameInfo(const name_s* name, size_t current_index)
     }
     
     fprintf(stderr, "│%17s",  print_string);
-    fprintf(stderr, "│%7ld", name->value);
+    fprintf(stderr, "│%7ld", name->node_index);
     fprintf(stderr, "│%6ld", name->next_element);
     fprintf(stderr, "│%6ld│\n", name->prev_element);
 }
@@ -182,7 +182,7 @@ GetLastElement(unsigned int hash,
 
 static size_t 
 NewNameInit(string_s*    string,
-            name_value_t value,
+            ssize_t      current_node,
             name_table_t name_table)
 {
     ASSERT(name_table);
@@ -198,7 +198,8 @@ NewNameInit(string_s*    string,
 
     name_table->next_free = name_table->name_array[new_element_index].next_element;
     new_name.next_element = NO_LINK;
-    new_name.value = value;
+    new_name.node_index = current_node;
+    new_name.value = name_table->name_array[new_element_index].value;
 
     if (new_name.prev_element != NO_LINK)
     {
@@ -211,10 +212,28 @@ NewNameInit(string_s*    string,
     return new_element_index;
 }
 
+double 
+GetVariableValue(string_s     var_string,
+                 name_table_t name_table)
+{
+    ASSERT(name_table != NULL);
+
+    unsigned int hash = MurmurHash2(var_string.string_source , 
+                                        var_string.string_size);
+    ssize_t index_in_name_table = FindAnyElementInTable(hash, name_table);
+
+    if (index_in_name_table == NO_LINK)
+    {
+        return 0;
+    }
+
+    return name_table->name_array[index_in_name_table].value;
+}
+
 name_table_return_e 
 AddNameInTable(string_s*    string,
                size_t*      index_in_name_table,
-               name_value_t value,    
+               ssize_t      current_node,    
                name_table_t name_table)
 {
     ASSERT(string != NULL);
@@ -232,7 +251,7 @@ AddNameInTable(string_s*    string,
         }
     }
 
-    *index_in_name_table = NewNameInit(string, value, name_table);
+    *index_in_name_table = NewNameInit(string, current_node, name_table);
 
     name_table->name_count++;
 

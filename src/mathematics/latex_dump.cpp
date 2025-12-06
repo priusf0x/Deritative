@@ -220,16 +220,16 @@ CheckIfBracket(derivative_t derivative,
 
 void static 
 PrintTwoArgFunction(derivative_t derivative,
-                    ssize_t      current_node,
+                    size_t      current_node,
                     FILE*        output)
 {
     ASSERT(derivative != NULL);
 
     operations_e node_op = NODE(current_node)->node_value.expression.operation;
-    bool bracket_l = CheckIfBracket(derivative, current_node, L_O);
-    bool bracket_r = CheckIfBracket(derivative, current_node, R_O);
-    
-    fprintf(output, "{");
+    bool bracket_l = CheckIfBracket(derivative, (ssize_t) current_node, L_O);
+    bool bracket_r = CheckIfBracket(derivative, (ssize_t) current_node, R_O);
+   
+    fprintf(output, "{{");
     if (bracket_l)
     {fprintf(output, "(");}
     WriteExpression(derivative, NODE(current_node)->left_index, output);
@@ -243,7 +243,7 @@ PrintTwoArgFunction(derivative_t derivative,
     WriteExpression(derivative, NODE(current_node)->right_index, output);
     if (bracket_r)
     {fprintf(output, ")");}
-    fprintf(output, "}");
+    fprintf(output, "}}");
 }
 
 void static 

@@ -10,12 +10,14 @@ enum name_table_return_e
     NAME_TABLE_RETURN_INCORRECT_VALUE
 };
 
-typedef ssize_t name_value_t;
+typedef double const_type;
+
 struct name_s 
 {
     string_s     name_string;
     unsigned int hash;
-    name_value_t value;
+    ssize_t      node_index;
+    const_type   value;
     ssize_t      next_element;
     ssize_t      prev_element;
 };
@@ -38,10 +40,15 @@ name_table_return_e DestroyNameTable(name_table_t* name_table);\
 
 void NameTableDump(name_table_t name_table);
 
+// ============================== ELEMENTS_ACTION =============================
+
+double 
+GetVariableValue(string_s variable_name, name_table_t name_table);
+
 // ============================ ELEMENT_ADD_DELETE ============================
 
 name_table_return_e DeleteElementInTable(size_t name_index, name_table_t name_table);
 name_table_return_e AddNameInTable(string_s* string, size_t* index_in_name_table, 
-                                   name_value_t value, name_table_t name_table);
+                                   ssize_t current_node, name_table_t name_table);
 
 #endif // NAME_SPACE_H
