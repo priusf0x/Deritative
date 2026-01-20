@@ -64,6 +64,7 @@ static ssize_t GetE(derivative_t derivative);
 static ssize_t GetT(derivative_t derivative);
 static ssize_t GetP(derivative_t derivative);
 static ssize_t GetN(derivative_t derivative);
+static ssize_t GetPower(derivative_t derivative);
 
 static operations_e 
 CheckIfFunction(derivative_t derivative)
@@ -180,37 +181,46 @@ GetP(derivative_t derivative)
         variable_s var = {};
         ReadVarInBuffer(&var, derivative->buffer);
 
-        if (*CURRENT_STRING == '^')
-        {
-            SkipNSymbols(derivative->buffer, 1);
-            SkipSpacesInBuffer(derivative->buffer);
-
-            return POW__(VAR__(&var), GetP(derivative));
-        }
-
         return VAR__(&var);
     }
     else 
     {
         ssize_t new_num = GetN(derivative);
 
-        if (*CURRENT_STRING == '^')
-        {
-            SkipNSymbols(derivative->buffer, 1);
-            SkipSpacesInBuffer(derivative->buffer);
-
-            return POW__(new_num, GetP(derivative));
-        }
         return new_num;
     }
 }
+
+static ssize_t
+GetPower(derivative_t derivative)
+{
+    RETURN_NO_LINK_IF_ERROR;
+
+    ssize_t base = GetP(derivative);
+
+    #ifndef NDEBUG
+        BufferDump(derivative->buffer);
+    #endif
+
+
+    if (*CURRENT_STRING == '^')
+    {
+        SkipNSymbols(derivative->buffer, 1);
+        SkipSpacesInBuffer(derivative->buffer);
+
+        return POW__(base, GetP(derivative));
+    }
+    
+    return base; 
+} 
+
 
 static ssize_t
 GetT(derivative_t derivative)
 {
     RETURN_NO_LINK_IF_ERROR;
 
-    ssize_t last_add = GetP(derivative);
+    ssize_t last_add = GetPower(derivative);
 
     char last_symbol = *CURRENT_STRING;
     char operation = 0;
@@ -231,11 +241,11 @@ GetT(derivative_t derivative)
         switch(operation)
        {
             case '*':
-                last_add = MUL__(last_add, GetP(derivative));
+                last_add = MUL__(last_add, GetPower(derivative));
                 break;
 
             case '/':
-                last_add = DIV__(last_add, GetP(derivative));
+                last_add = DIV__(last_add, GetPower(derivative));
                 break;
 
             default: derivative->error = DERIVATIVE_RETURN_READ_ERROR;  

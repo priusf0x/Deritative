@@ -47,7 +47,7 @@ GetSubGraphLength(ssize_t current_node, derivative_t derivative);
                          PARENT_INDEX(output) = parent_index;\
                          return output;\
                         } while (0)
-
+                        
 #define D__(_X_) TakeExpressionDerivative(derivative, (_X_))
 #define COPY__(_SRC_) DerivativeCopy(derivative, (_SRC_))
 

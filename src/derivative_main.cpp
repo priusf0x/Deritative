@@ -43,8 +43,6 @@ main()
         return error_number;
     }   
 
-    LogDeritativeInLatex(derivative, 0, NULL);
-
     if ((error_number = TakeDerivative(derivative, "x") // need to be added gui inteface??? 
             != DERIVATIVE_RETURN_SUCCESS))
     {

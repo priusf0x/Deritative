@@ -530,6 +530,28 @@ CopyNode(tree_t     tree,
     return TREE_RETURN_SUCCESS; 
 }
 
+size_t 
+CountNodes(tree_t  tree,
+           ssize_t index)
+{
+    ASSERT(tree != NULL);
+
+    if (index == NO_LINK)
+    {
+        return 0;
+    }
+    
+    node_s node = tree->nodes_array[index];
+
+    size_t node_amount = 0;
+    
+    node_amount += CountNodes(tree, node.left_index);
+    node_amount += CountNodes(tree, node.right_index);
+    node_amount++;
+
+    return node_amount; 
+}
+
 // ============================ UNDECLARATION ==================================
 
 #undef RETURN_IF_NODE_BAD

@@ -75,4 +75,7 @@ tree_return_e
 ForceConnect(tree_t tree, ssize_t current_index, ssize_t new_parent, 
             edge_dir_e new_direction);
 
+size_t 
+CountNodes(tree_t tree, ssize_t index);
+
 #endif //TREE_H

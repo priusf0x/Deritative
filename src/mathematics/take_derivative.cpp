@@ -37,7 +37,7 @@ TakePlusDerivative(derivative_t derivative,
 static ssize_t 
 TakeMinusDerivative(derivative_t derivative,
                     ssize_t      current_node)
-{ REPLACE(SUB__(D__(c_L), D__(c_R))); }
+{ REPLACE(SUB__(D__(c_L), D__(R_O))); }
 
 static ssize_t 
 TakeMulDerivative(derivative_t derivative,
@@ -103,6 +103,27 @@ struct function_derivative_s
 
 // ========================== MAIN_DERIVATIVE ================================
 
+static void 
+LogCurrent(derivative_t derivative,
+           ssize_t      current_node)
+{   
+    ASSERT(derivative != NULL);
+
+    node_s node = derivative->ariphmetic_tree->
+                    nodes_array[current_node];
+
+    while ((node.parent_index != NO_LINK)
+            && (current_node != 0))
+    {
+        current_node = node.parent_index;
+
+        node = derivative->ariphmetic_tree->
+                    nodes_array[current_node];
+    }
+
+    LogDeritativeInLatex(derivative, current_node, NULL);
+}
+
 ssize_t
 TakeExpressionDerivative(derivative_t derivative,
                          ssize_t      current_node)
@@ -120,18 +141,21 @@ TakeExpressionDerivative(derivative_t derivative,
                             nodes_array[current_node].left_index;
     }
 
-    LogDeritativeInLatex(derivative, current_node, NULL);
-    
     expression_s node_value = derivative->ariphmetic_tree->
                                 nodes_array[current_node].node_value;
 
+    LogCurrent(derivative, current_node);
+
+    ssize_t function = DerivativeCopy(derivative, current_node);
+    ssize_t return_node = NO_LINK;
+
     if (node_value.expression_type == EXPRESSION_TYPE_CONST)
     {
-        return TakeConstDerivative(derivative, current_node);
+        return_node = TakeConstDerivative(derivative, current_node); 
     }
     else if (node_value.expression_type == EXPRESSION_TYPE_VAR)
     {
-        return TakeVarDerivative(derivative, current_node);
+        return_node = TakeVarDerivative(derivative, current_node);
     }
     else if (node_value.expression_type == EXPRESSION_TYPE_OPERATOR)
     {
@@ -141,11 +165,17 @@ TakeExpressionDerivative(derivative_t derivative,
             return NO_LINK;
         }
 
-        return OPERATION_INFO[node_value.expression.operation]
+        return_node = OPERATION_INFO[node_value.expression.operation]
                             .op_function(derivative, current_node);
     }
+
     
-    return NO_LINK;
+    LogCurrent(derivative, function);
+    LogCurrent(derivative, return_node);
+
+    DeleteSubgraph(derivative->ariphmetic_tree, function);
+
+    return return_node;
 }
 
 derivative_return_e 

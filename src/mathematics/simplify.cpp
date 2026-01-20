@@ -61,7 +61,7 @@ SimplifyGraph(derivative_t derivative)
     do
     {
         previous_size = current_size;
-        LogDeritativeInLatex(derivative, 0, NULL);
+        // LogDeritativeInLatex(derivative, 0, NULL);
         
         ssize_t output = SimplifyConst(derivative, 0);
         NODE(0)->left_index = output;
