@@ -103,27 +103,6 @@ struct function_derivative_s
 
 // ========================== MAIN_DERIVATIVE ================================
 
-static void 
-LogCurrent(derivative_t derivative,
-           ssize_t      current_node)
-{   
-    ASSERT(derivative != NULL);
-
-    node_s node = derivative->ariphmetic_tree->
-                    nodes_array[current_node];
-
-    while ((node.parent_index != NO_LINK)
-            && (current_node != 0))
-    {
-        current_node = node.parent_index;
-
-        node = derivative->ariphmetic_tree->
-                    nodes_array[current_node];
-    }
-
-    LogDeritativeInLatex(derivative, current_node, NULL);
-}
-
 ssize_t
 TakeExpressionDerivative(derivative_t derivative,
                          ssize_t      current_node)
@@ -144,7 +123,7 @@ TakeExpressionDerivative(derivative_t derivative,
     expression_s node_value = derivative->ariphmetic_tree->
                                 nodes_array[current_node].node_value;
 
-    LogCurrent(derivative, current_node);
+    LogDeritativeInLatex(derivative, current_node, NULL);
 
     ssize_t function = DerivativeCopy(derivative, current_node);
     ssize_t return_node = NO_LINK;
@@ -169,11 +148,14 @@ TakeExpressionDerivative(derivative_t derivative,
                             .op_function(derivative, current_node);
     }
 
-    
-    LogCurrent(derivative, function);
-    LogCurrent(derivative, return_node);
+    LogAssignment(derivative, function, return_node, NULL);
 
-    DeleteSubgraph(derivative->ariphmetic_tree, function);
+    if (DeleteSubgraph(derivative->ariphmetic_tree, function) != 0)
+    {
+        derivative->error = DERIVATIVE_RETURN_LOG_ERROR;
+
+        return NO_LINK;
+    }
 
     return return_node;
 }

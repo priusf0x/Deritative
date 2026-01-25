@@ -9,6 +9,7 @@
 #include "tools.h"
 #include "derivative_defines.h"
 #include "operation_info.h"
+#include "tree.h"
 
 static const char* latex_log_file_name = "logs/latex_dump.tex"; 
 
@@ -32,12 +33,49 @@ WriteExpression(derivative_t deritative,
                 ssize_t      current_node,
                 FILE*        output_file);
 
+void 
+LogAssignment(derivative_t derivative,
+              ssize_t      l_value,
+              ssize_t      r_value,
+              FILE*        output_file)
+{
+    ASSERT(derivative != NULL);
+    
+    if ((l_value == NO_LINK) || (r_value == NO_LINK))
+    {
+        return;
+    }
+    
+    if (output_file == NULL)
+    {
+        output_file = GetLatexLogFile();
+        if (output_file == NULL)
+        {   
+            return;
+        }
+    }   
+
+    fprintf(output_file, "%% [Тогда производная примет следующий вид]\n");
+    fprintf(output_file, "\\begin{align}\n");
+    fprintf(output_file, "(");
+    WriteExpression(derivative, l_value, output_file);
+    fprintf(output_file, ")\' = ");
+    WriteExpression(derivative, r_value, output_file);
+    fprintf(output_file, "\n\\end{align}\n");
+
+}
+
 void
 LogDeritativeInLatex(derivative_t derivative,
                      ssize_t      current_node,
                      FILE*        output_file)
 {
     ASSERT(derivative != NULL);
+            
+    if (current_node == NO_LINK)
+    {
+        return;
+    }
     
     if (output_file == NULL)
     {
@@ -48,13 +86,9 @@ LogDeritativeInLatex(derivative_t derivative,
         }
     }   
     
-    if (current_node == 0)
-    {
-        current_node = NODE(0)->left_index;
-    }
-
+    fprintf(output_file, "%% [Рассмотрим это выражение]\n");
     fprintf(output_file, "\\begin{align}\n");
-    WriteExpression(derivative, (ssize_t) current_node, output_file);
+    WriteExpression(derivative, current_node, output_file);
     fprintf(output_file, "\n\\end{align}\n");
 }
 
@@ -64,6 +98,7 @@ static FILE*
 GetLatexLogFile()
 {
     static FILE* maxim_gorohov_file = fopen(latex_log_file_name, "w+");
+
     return maxim_gorohov_file;
 }
 
@@ -103,7 +138,8 @@ StartLatexDocument(FILE* output_file)
 }
 
 void 
-EndLatexDocument(FILE* output_file)
+EndLatexDocument(derivative_t derivative,
+                 FILE*        output_file)
 {
     if (output_file == NULL)
     {
@@ -113,6 +149,12 @@ EndLatexDocument(FILE* output_file)
             return;
         }
     }
+    
+    fprintf(output_file, "%% [Конечное выражение примет вид]\n");
+    fprintf(output_file, "\\begin{align}\n"
+                         "\\boxed\n");
+    WriteExpression(derivative, 0, output_file);
+    fprintf(output_file, "\n\\end{align}\n");
 
     const char* end_text = "\\end{document}\n";
 
@@ -123,7 +165,7 @@ EndLatexDocument(FILE* output_file)
         SystemCall("python src/groq/groq_help.py");
     #endif 
 
-    SystemCall("pdflatex %s -f y -interaction=nonstopmode -halt-on-error \
+    SystemCall("latex %s -f y -interaction=nonstopmode -halt-on-error \
             -file-line-error 2 > latex_output.log", latex_log_file_name);
     SystemCall("rm *.aux *.log >latex_output.log");
 }
@@ -280,11 +322,20 @@ WriteExpression(derivative_t deritative,
 {
     ASSERT(deritative != NULL);
     ASSERT(output_file != NULL);
+
     if (current_node == NO_LINK)
     {
         return;
     }
+
     node_s node = deritative->ariphmetic_tree->nodes_array[current_node];
+    
+    if (current_node == 0)
+    {
+        current_node = node.left_index; 
+        if (current_node == NO_LINK) return;
+        node = deritative->ariphmetic_tree->nodes_array[current_node];
+    }
 
     switch(node.node_value.expression_type)
     {

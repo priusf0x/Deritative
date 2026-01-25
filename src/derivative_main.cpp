@@ -1,15 +1,9 @@
 #include "derivative.h"
 
-#include "derivative_defines.h"
-#include "tree.h"
-#include "simple_parser.h"
-#include "my_string.h"
-#include "tools.h"
 #include "take_derivative.h"
 #include "latex_dump.h"
 #include "simplify.h"
 #include "recursive_decent.h"
-#include "calculate_expression.h"
 
 static const char* formula_file_name = "pletnev.zov";
 
@@ -54,15 +48,14 @@ main()
 
     if ((error_number = SimplifyGraph(derivative)) != DERIVATIVE_RETURN_SUCCESS)
     {
-        printf("Simplify Error:%d\n", error_number);
+        fprintf(stderr, "Simplify Error:%d\n", error_number);
         DerivativeDestroy(&derivative);
         
         return error_number;
     }
 
-    LogDeritativeInLatex(derivative, 0, NULL);
+    EndLatexDocument(derivative, NULL);
     DerivativeDestroy(&derivative);
-    EndLatexDocument(NULL);
 
     return 0;
 } 
